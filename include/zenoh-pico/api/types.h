@@ -207,6 +207,14 @@ typedef _z_timestamp_t z_timestamp_t;
  */
 typedef _z_value_t z_value_t;
 
+typedef int8_t (*zp_serializer_t)(int8_t (*write)(void *writer, const char *serialized, int serialized_len),void *writer, void *ctx);
+typedef int8_t (*zp_deserializer_t)(const char* serialized, int serialized_len, void **ctx);
+
+typedef struct {
+    zp_serializer_t serialize;
+    zp_deserializer_t deserialize;
+} zp_serde_functions_t;
+
 /**
  * Represents the set of options that can be applied to a (push) subscriber,
  * upon its declaration via :c:func:`z_declare_subscriber`.
@@ -216,6 +224,7 @@ typedef _z_value_t z_value_t;
  */
 typedef struct {
     z_reliability_t reliability;
+    zp_serde_functions_t serde_functions;
 } z_subscriber_options_t;
 
 /**
@@ -227,6 +236,7 @@ typedef struct {
  */
 typedef struct {
     z_reliability_t reliability;
+    zp_serde_functions_t serde_functions;
 } z_pull_subscriber_options_t;
 
 /**
@@ -251,6 +261,7 @@ typedef struct {
 typedef struct {
     z_congestion_control_t congestion_control;
     z_priority_t priority;
+    zp_serde_functions_t serde_functions;
 } z_publisher_options_t;
 
 /**
@@ -262,6 +273,7 @@ typedef struct {
  */
 typedef struct {
     _Bool complete;
+    zp_serde_functions_t serde_functions;
 } z_queryable_options_t;
 
 /**
@@ -273,6 +285,7 @@ typedef struct {
  */
 typedef struct {
     z_encoding_t encoding;
+    zp_serde_functions_t serde_functions;
 } z_query_reply_options_t;
 
 /**
@@ -288,6 +301,7 @@ typedef struct {
     z_encoding_t encoding;
     z_congestion_control_t congestion_control;
     z_priority_t priority;
+    zp_serde_functions_t serde_functions;
 } z_put_options_t;
 
 /**
@@ -301,6 +315,7 @@ typedef struct {
 typedef struct {
     z_congestion_control_t congestion_control;
     z_priority_t priority;
+    zp_serde_functions_t serde_functions;
 } z_delete_options_t;
 
 /**
@@ -312,6 +327,7 @@ typedef struct {
  */
 typedef struct {
     z_encoding_t encoding;
+    zp_serde_functions_t serde_functions;
 } z_publisher_put_options_t;
 
 /**
@@ -335,6 +351,7 @@ typedef struct {
     z_value_t value;
     z_query_consolidation_t consolidation;
     z_query_target_t target;
+    zp_serde_functions_t serde_functions;
 } z_get_options_t;
 
 /**
