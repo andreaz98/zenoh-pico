@@ -261,7 +261,6 @@ typedef struct {
 typedef struct {
     z_congestion_control_t congestion_control;
     z_priority_t priority;
-    zp_serde_functions_t serde_functions;
 } z_publisher_options_t;
 
 /**
@@ -285,7 +284,6 @@ typedef struct {
  */
 typedef struct {
     z_encoding_t encoding;
-    zp_serde_functions_t serde_functions;
 } z_query_reply_options_t;
 
 /**
@@ -301,7 +299,6 @@ typedef struct {
     z_encoding_t encoding;
     z_congestion_control_t congestion_control;
     z_priority_t priority;
-    zp_serde_functions_t serde_functions;
 } z_put_options_t;
 
 /**
@@ -315,7 +312,6 @@ typedef struct {
 typedef struct {
     z_congestion_control_t congestion_control;
     z_priority_t priority;
-    zp_serde_functions_t serde_functions;
 } z_delete_options_t;
 
 /**
@@ -327,7 +323,6 @@ typedef struct {
  */
 typedef struct {
     z_encoding_t encoding;
-    zp_serde_functions_t serde_functions;
 } z_publisher_put_options_t;
 
 /**
