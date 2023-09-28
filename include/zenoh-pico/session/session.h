@@ -27,6 +27,13 @@
 #include "zenoh-pico/protocol/core.h"
 #include "zenoh-pico/transport/manager.h"
 
+typedef int8_t (*zp_serializer_t)(int8_t (*write)(void *writer, const char *serialized, int serialized_len),void *writer, void *ctx);
+typedef int8_t (*zp_deserializer_t)(const char* serialized, int serialized_len, void **ctx);
+
+typedef struct {
+    zp_serializer_t serialize;
+    zp_deserializer_t deserialize;
+} zp_serde_functions_t;
 /**
  * The callback signature of the cleanup functions.
  */
@@ -95,6 +102,7 @@ typedef struct {
     _z_drop_handler_t _dropper;
     void *_arg;
     _z_subinfo_t _info;
+    zp_serde_functions_t serde_functions;
 } _z_subscription_t;
 
 _Bool _z_subscription_eq(const _z_subscription_t *one, const _z_subscription_t *two);
@@ -122,6 +130,7 @@ typedef struct {
     _z_drop_handler_t _dropper;
     void *_arg;
     _Bool _complete;
+    zp_serde_functions_t serde_functions;
 } _z_questionable_t;
 
 _Bool _z_questionable_eq(const _z_questionable_t *one, const _z_questionable_t *two);
@@ -161,6 +170,7 @@ typedef struct {
     z_query_target_t _target;
     z_consolidation_mode_t _consolidation;
     _Bool _anykey;
+    zp_serde_functions_t serde_functions;
 } _z_pending_query_t;
 
 _Bool _z_pending_query_eq(const _z_pending_query_t *one, const _z_pending_query_t *two);
