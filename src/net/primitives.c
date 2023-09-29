@@ -126,7 +126,7 @@ int8_t _z_undeclare_publisher(_z_publisher_t *pub) {
 
 /*------------------ Subscriber Declaration ------------------*/
 _z_subscriber_t *_z_declare_subscriber(_z_session_t *zn, _z_keyexpr_t keyexpr, _z_subinfo_t sub_info,
-                                       _z_data_handler_t callback, _z_drop_handler_t dropper, void *arg) {
+                                       _z_data_handler_t callback, _z_drop_handler_t dropper, void *arg, zp_serde_functions_t serde_functions) {
     _z_subscription_t s;
     s._id = _z_get_entity_id(zn);
     s._key = _z_get_expanded_key_from_key(zn, &keyexpr);
@@ -134,6 +134,7 @@ _z_subscriber_t *_z_declare_subscriber(_z_session_t *zn, _z_keyexpr_t keyexpr, _
     s._callback = callback;
     s._dropper = dropper;
     s._arg = arg;
+    s.serde_functions = serde_functions;
 
     _z_subscriber_t *ret = (_z_subscriber_t *)z_malloc(sizeof(_z_subscriber_t));
     if (ret != NULL) {

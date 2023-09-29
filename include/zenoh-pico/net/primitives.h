@@ -115,7 +115,7 @@ int8_t _z_undeclare_publisher(_z_publisher_t *pub);
  *    The created :c:type:`_z_subscriber_t` or null if the declaration failed.
  */
 _z_subscriber_t *_z_declare_subscriber(_z_session_t *zn, _z_keyexpr_t keyexpr, _z_subinfo_t sub_info,
-                                       _z_data_handler_t callback, _z_drop_handler_t dropper, void *arg);
+                                       _z_data_handler_t callback, _z_drop_handler_t dropper, void *arg, zp_serde_functions_t serde_functions);
 
 /**
  * Undeclare a :c:type:`_z_subscriber_t`.

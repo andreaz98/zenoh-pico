@@ -843,7 +843,7 @@ z_owned_subscriber_t z_declare_subscriber(z_session_t zs, z_keyexpr_t keyexpr, z
     }
 
     return (z_owned_subscriber_t){
-        ._value = _z_declare_subscriber(zs._val, key, subinfo, callback->call, callback->drop, ctx)};
+        ._value = _z_declare_subscriber(zs._val, key, subinfo, callback->call, callback->drop, ctx, options->serde_functions)};
 }
 
 z_owned_pull_subscriber_t z_declare_pull_subscriber(z_session_t zs, z_keyexpr_t keyexpr,
@@ -867,7 +867,7 @@ z_owned_pull_subscriber_t z_declare_pull_subscriber(z_session_t zs, z_keyexpr_t 
     }
 
     return (z_owned_pull_subscriber_t){
-        ._value = _z_declare_subscriber(zs._val, key, subinfo, callback->call, callback->drop, ctx)};
+        ._value = _z_declare_subscriber(zs._val, key, subinfo, callback->call, callback->drop, ctx, options->serde_functions)};
 }
 
 int8_t z_undeclare_subscriber(z_owned_subscriber_t *sub) {
