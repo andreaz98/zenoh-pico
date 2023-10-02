@@ -19,16 +19,27 @@
 
 #include "zenoh-pico/api/types.h"
 
-/// @brief Prepares the board to go to sleep.
-/// @param session the session to be saved.
-/// @return 0 - session has been correctly processed, -1 otherwise.
-int zp_prepare_to_sleep(z_owned_session_t session);
 
-/// @brief Prepares the session after a board wake up.
-/// @return The session.
+// These are the dimensions for the arrays in the RTC Slow RAM that will
+// contain your serialized structs while in deep sleep/hibernation mode.
+// Feel free to re-dimension these values accordingly to the purpose of
+// your application. Remember, those values must be at least 4 as it is
+// the size of a size_t which represents the number of elements in a list.
+
+#define DIM_LOCAL_RESOURCES 512
+#define DIM_REMOTE_RESOURCES 512
+
+#define DIM_LOCAL_SUBSCRIPTIONS 512
+#define DIM_REMOTE_SUBSCRIPTIONS 512
+
+int zp_prepare_to_sleep(z_owned_session_t session);
 z_owned_session_t zp_wake_up();
 
-size_t _serialize_z_resource_list_t(_z_resource_list_t *list, uint8_t *resources);
+int _serialize_z_resource_list_t(_z_resource_list_t *list, uint8_t *resources);
 _z_resource_list_t * _deserialize_z_resource_list_t(uint8_t *buffer);
 
-uint8_t * _serialize_zn_subscriber_list_t(_z_subscription_sptr_list_t * list, size_t *len);
+int _serialize_z_subscription_sptr_list_t(_z_subscription_sptr_list_t * list, int8_t (*write)(void *writer, const char *serialized, int serialized_len), uint8_t * subscriptions);
+_z_subscription_sptr_list_t * _deserialize_z_subscription_sptr_list_t(uint8_t * buffer);
+
+int8_t _write_subscription_local(void * writer, const char * serialized, int serialized_len);
+int8_t _write_subscription_remote(void * writer, const char * serialized, int serialized_len);
