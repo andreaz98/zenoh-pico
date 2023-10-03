@@ -183,39 +183,39 @@ int _serialize_z_subscription_sptr_list_t(_z_subscription_sptr_list_t * list, in
         memcpy(_buffer, &element->ptr->_info.mode, sizeof(z_submode_t));
         _buffer += sizeof(z_submode_t);
 
-        memcpy(_buffer, element->ptr->_callback, 4); //cannot be NULL
+        memcpy(_buffer, &element->ptr->_callback, 4); //cannot be NULL
         _buffer += 4;
 
         size_t zero = 0;
         if(element->ptr->_dropper != NULL){
-            memcpy(_buffer, element->ptr->_dropper, 4);
+            memcpy(_buffer, &element->ptr->_dropper, 4);
             _buffer += 4;
         } else {
-            memcpy(_buffer, &zero, sizeof(size_t));
-            _buffer += sizeof(size_t);
+            memcpy(_buffer, &zero, 4);
+            _buffer += 4;
         }
 
         if(element->ptr->serde_functions.serialize != NULL){
-            memcpy(_buffer, element->ptr->serde_functions.serialize, 4);
+            memcpy(_buffer, &element->ptr->serde_functions.serialize, 4);
             _buffer += 4;
         } else {
-            memcpy(_buffer, &zero, sizeof(size_t));
-            _buffer += sizeof(size_t);
+            memcpy(_buffer, &zero, 4);
+            _buffer += 4;
         }
 
         if(element->ptr->serde_functions.deserialize != NULL){
-            memcpy(_buffer, element->ptr->serde_functions.deserialize, 4);
+            memcpy(_buffer, &element->ptr->serde_functions.deserialize, 4);
             _buffer += 4;
         } else {
-            memcpy(_buffer, &zero, sizeof(size_t));
-            _buffer += sizeof(size_t);
+            memcpy(_buffer, &zero, 4);
+            _buffer += 4;
         }
 
         if(element->ptr->_arg != NULL){
             element->ptr->serde_functions.serialize(write, NULL, element->ptr->_arg);
         } else {
-            memcpy(_buffer, &zero, sizeof(size_t));
-            _buffer += sizeof(size_t);
+            memcpy(_buffer, &zero, 4);
+            _buffer += 4;
         }
 
         iterate_list = _z_subscription_sptr_list_tail(iterate_list);
@@ -249,8 +249,8 @@ _z_subscription_sptr_list_t * _deserialize_z_subscription_sptr_list_t(uint8_t * 
         memcpy(&element->ptr->_key._mapping._val, _buffer, sizeof(uint16_t));
         _buffer += sizeof(uint16_t);
 
-        element->ptr->_key._suffix = malloc(strlen(element->ptr->_key._suffix) + 1);
-        memcpy(element->ptr->_key._suffix, _buffer, strlen(element->ptr->_key._suffix) + 1);
+        element->ptr->_key._suffix = malloc(strlen((char *)_buffer) + 1);
+        memcpy(element->ptr->_key._suffix, _buffer, strlen((char *)_buffer) + 1);
         _buffer += strlen(element->ptr->_key._suffix) + 1;
         printf("DEBUG element->ptr->_key._suffix: %s\n", element->ptr->_key._suffix);
 
@@ -273,36 +273,36 @@ _z_subscription_sptr_list_t * _deserialize_z_subscription_sptr_list_t(uint8_t * 
         memcpy(&element->ptr->_info.mode, _buffer, sizeof(z_submode_t));
         _buffer += sizeof(z_submode_t);
 
-        memcpy(element->ptr->_callback, _buffer, 4); //cannot be NULL
+        memcpy(&element->ptr->_callback, _buffer, 4); //cannot be NULL
         _buffer += 4;
         printf("DEBUG element->ptr->_callback: %p\n", element->ptr->_callback);
 
         //_dropper serialize deserialize _arg_len _arg
         size_t tmp_maybe_address;
-        memcpy(&tmp_maybe_address, _buffer, sizeof(size_t));
+        memcpy(&tmp_maybe_address, _buffer, 4);
         if(tmp_maybe_address == 0){
             element->ptr->_dropper = NULL;
             _buffer += 4;
         } else {
-            memcpy(element->ptr->_dropper, _buffer, 4);
+            memcpy(&element->ptr->_dropper, _buffer, 4);
             _buffer += 4;
         }
 
-        memcpy(&tmp_maybe_address, _buffer, sizeof(size_t));
+        memcpy(&tmp_maybe_address, _buffer, 4);
         if(tmp_maybe_address == 0){
             element->ptr->serde_functions.serialize = NULL;
             _buffer += 4;
         } else {
-            memcpy(element->ptr->serde_functions.serialize, _buffer, 4);
+            memcpy(&element->ptr->serde_functions.serialize, _buffer, 4);
             _buffer += 4;
         }
 
-        memcpy(&tmp_maybe_address, _buffer, sizeof(size_t));
+        memcpy(&tmp_maybe_address, _buffer, 4);
         if(tmp_maybe_address == 0){
             element->ptr->serde_functions.deserialize = NULL;
             _buffer += 4;
         } else {
-            memcpy(element->ptr->serde_functions.deserialize, _buffer, 4);
+            memcpy(&element->ptr->serde_functions.deserialize, _buffer, 4);
             _buffer += 4;
         }
 
