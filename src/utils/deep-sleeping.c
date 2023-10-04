@@ -15,11 +15,15 @@
 
 #include "zenoh-pico/utils/deep-sleeping.h"
 
+#include <esp_log.h>
+
 RTC_DATA_ATTR static uint8_t local_resources[DIM_LOCAL_RESOURCES];
 RTC_DATA_ATTR static uint8_t remote_resources[DIM_REMOTE_RESOURCES];
 
 RTC_DATA_ATTR static uint8_t local_subscriptions[DIM_LOCAL_SUBSCRIPTIONS];
 RTC_DATA_ATTR static uint8_t remote_subscriptions[DIM_REMOTE_SUBSCRIPTIONS];
+
+RTC_DATA_ATTR static uint8_t local_questionable[DIM_LOCAL_QUESTIONABLE];
 
 int zp_prepare_to_sleep(z_owned_session_t zs){
     _serialize_z_resource_list_t(zs._value->_local_resources, local_resources);
@@ -49,6 +53,8 @@ z_owned_session_t zp_wake_up(){
         zs._value->_local_subscriptions = _deserialize_z_subscription_sptr_list_t(local_subscriptions);
         zs._value->_remote_subscriptions = _deserialize_z_subscription_sptr_list_t(remote_subscriptions);
     
+        // memset(local_questionable, 0, DIM_LOCAL_QUESTIONABLE);
+        // zs._value->_local_questionable = 
     }
 
     return zs;
@@ -285,4 +291,57 @@ _z_subscription_sptr_list_t * _deserialize_z_subscription_sptr_list_t(uint8_t * 
     
 
     return list;
+}
+
+int _serialize_z_questionable_sptr_list_t(_z_questionable_sptr_list_t * list, int8_t (*write)(void *writer, const char *serialized, int serialized_len), uint8_t * questionable){
+    int ret = _Z_RES_OK;
+    _z_questionable_sptr_t *element;
+
+    size_t no_of_elements = _z_questionable_sptr_list_len(list);
+
+    uint8_t *_buffer = questionable;
+
+    //Serialization
+    memcpy(_buffer, &no_of_elements, sizeof(size_t));
+    _buffer += sizeof(size_t);
+
+    _z_subscription_sptr_list_t *iterate_list = list;
+    while(!_z_questionable_sptr_list_is_empty(iterate_list))
+    {
+        element = _z_questionable_sptr_list_head(iterate_list);
+
+        //_key._id _key._mapping._val _key._suffix _id _complete _callback _dropper serialize deserialize _arg_len _arg (the latter 2 by write functions)
+        memcpy(_buffer, &element->ptr->_key._id, sizeof(uint16_t));
+        _buffer += sizeof(uint16_t);
+
+        memcpy(_buffer, &element->ptr->_key._mapping._val, sizeof(uint16_t));
+        _buffer += sizeof(uint16_t);
+
+        memcpy(_buffer, element->ptr->_key._suffix, strlen(element->ptr->_key._suffix) + 1);
+        _buffer += strlen(element->ptr->_key._suffix) + 1;
+
+        memcpy(_buffer, &element->ptr->_id, sizeof(uint32_t));
+        _buffer += sizeof(uint32_t);
+
+        memcpy(_buffer, &element->ptr->_complete, sizeof(_Bool));
+        _buffer += sizeof(uint32_t);
+
+        memcpy(_buffer, &element->ptr->_callback, 4); //cannot be NULL
+        _buffer += 4;
+
+        if(element->ptr->_dropper != NULL) memcpy(_buffer, &element->ptr->_dropper, 4);
+        _buffer += 4;
+
+        if(element->ptr->serde_functions.serialize != NULL) memcpy(_buffer, &element->ptr->serde_functions.serialize, 4);
+        _buffer += 4;
+
+        if(element->ptr->serde_functions.deserialize != NULL) memcpy(_buffer, &element->ptr->serde_functions.deserialize, 4);
+        _buffer += 4;
+
+        if(element->ptr->_arg != NULL) element->ptr->serde_functions.serialize(write, NULL, element->ptr->_arg);
+        _buffer += 4;
+
+        iterate_list = _z_questionable_sptr_list_tail(iterate_list);
+    }
+    return ret;
 }

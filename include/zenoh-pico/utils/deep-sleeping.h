@@ -25,12 +25,15 @@
 // Feel free to re-dimension these values accordingly to the purpose of
 // your application. Remember, those values must be at least 4 as it is
 // the size of a size_t which represents the number of elements in a list.
+// The sum of these dimensions must not exceed 8 KiB.
 
 #define DIM_LOCAL_RESOURCES 512
 #define DIM_REMOTE_RESOURCES 512
 
 #define DIM_LOCAL_SUBSCRIPTIONS 512
 #define DIM_REMOTE_SUBSCRIPTIONS 512
+
+#define DIM_LOCAL_QUESTIONABLE 512
 
 int zp_prepare_to_sleep(z_owned_session_t session);
 z_owned_session_t zp_wake_up();
@@ -43,3 +46,6 @@ _z_subscription_sptr_list_t * _deserialize_z_subscription_sptr_list_t(uint8_t * 
 
 int8_t _write_subscription_local(void * writer, const char * serialized, int serialized_len);
 int8_t _write_subscription_remote(void * writer, const char * serialized, int serialized_len);
+
+int _serialize_z_questionable_sptr_list_t(_z_questionable_sptr_list_t * list, int8_t (*write)(void *writer, const char *serialized, int serialized_len), uint8_t * questionable);
+_z_questionable_sptr_list_t * _deserialize_z_questionable_sptr_list_t(uint8_t * buffer);
