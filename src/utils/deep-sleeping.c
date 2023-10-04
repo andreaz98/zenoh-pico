@@ -26,6 +26,8 @@ int zp_prepare_to_sleep(z_owned_session_t zs){
     _serialize_z_resource_list_t(zs._value->_remote_resources, remote_resources);
 
     //TODO check that serialize/deserialize for arg are not null if arg is not null
+    memset(local_subscriptions, 0, DIM_LOCAL_SUBSCRIPTIONS);
+    memset(remote_subscriptions, 0, DIM_REMOTE_SUBSCRIPTIONS);
     _serialize_z_subscription_sptr_list_t(zs._value->_local_subscriptions, _write_subscription_local, local_subscriptions);
     _serialize_z_subscription_sptr_list_t(zs._value->_remote_subscriptions, _write_subscription_remote, remote_subscriptions);
 
@@ -40,10 +42,13 @@ z_owned_session_t zp_wake_up(){
         zs._value->_local_resources = _deserialize_z_resource_list_t(local_resources);
         zs._value->_remote_resources = _deserialize_z_resource_list_t(remote_resources);
 
-        memset(local_subscriptions, 0, DIM_LOCAL_SUBSCRIPTIONS);
-        memset(remote_subscriptions, 0, DIM_REMOTE_SUBSCRIPTIONS);
+        //solves assert failed: block_trim_free tlsf.c:502 (block_is_free(block) && "block must be free") but zeros the buffer for deserialization
+        // I'll keep the error above.
+        // memset(local_subscriptions, 0, DIM_LOCAL_SUBSCRIPTIONS);
+        // memset(remote_subscriptions, 0, DIM_REMOTE_SUBSCRIPTIONS);
         zs._value->_local_subscriptions = _deserialize_z_subscription_sptr_list_t(local_subscriptions);
         zs._value->_remote_subscriptions = _deserialize_z_subscription_sptr_list_t(remote_subscriptions);
+    
     }
 
     return zs;
