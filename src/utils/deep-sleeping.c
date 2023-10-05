@@ -35,6 +35,9 @@ int zp_prepare_to_sleep(z_owned_session_t zs){
     _serialize_z_subscription_sptr_list_t(zs._value->_local_subscriptions, _write_subscription_local, local_subscriptions);
     _serialize_z_subscription_sptr_list_t(zs._value->_remote_subscriptions, _write_subscription_remote, remote_subscriptions);
 
+    memset(local_questionable, 0, DIM_LOCAL_QUESTIONABLE);
+    _serialize_z_questionable_sptr_list_t(zs._value->_local_questionable, _write_questionable_local, local_questionable);
+
     return 0;
 }
 
@@ -54,7 +57,7 @@ z_owned_session_t zp_wake_up(){
         zs._value->_remote_subscriptions = _deserialize_z_subscription_sptr_list_t(remote_subscriptions);
     
         // memset(local_questionable, 0, DIM_LOCAL_QUESTIONABLE);
-        // zs._value->_local_questionable = 
+        zs._value->_local_questionable = _deserialize_z_questionable_sptr_list_t(local_questionable);
     }
 
     return zs;
@@ -147,6 +150,14 @@ int8_t _write_subscription_remote(void * writer, const char * serialized, int se
     int8_t ret = 0;
     memcpy(remote_subscriptions, &serialized_len, sizeof(serialized_len));
     memcpy(remote_subscriptions, serialized, serialized_len);
+
+    return ret;
+}
+
+int8_t _write_questionable_local(void * writer, const char * serialized, int serialized_len){
+    int8_t ret = 0;
+    memcpy(local_questionable, &serialized_len, sizeof(serialized_len));
+    memcpy(local_questionable, serialized, serialized_len);
 
     return ret;
 }
@@ -324,7 +335,7 @@ int _serialize_z_questionable_sptr_list_t(_z_questionable_sptr_list_t * list, in
         _buffer += sizeof(uint32_t);
 
         memcpy(_buffer, &element->ptr->_complete, sizeof(_Bool));
-        _buffer += sizeof(uint32_t);
+        _buffer += sizeof(_Bool);
 
         memcpy(_buffer, &element->ptr->_callback, 4); //cannot be NULL
         _buffer += 4;
@@ -344,4 +355,67 @@ int _serialize_z_questionable_sptr_list_t(_z_questionable_sptr_list_t * list, in
         iterate_list = _z_questionable_sptr_list_tail(iterate_list);
     }
     return ret;
+}
+
+_z_questionable_sptr_list_t * _deserialize_z_questionable_sptr_list_t(uint8_t * buffer){
+    _z_questionable_sptr_list_t * list = _z_questionable_sptr_list_new();
+    _z_questionable_sptr_t *element;
+    size_t no_of_elements;
+    uint8_t * _buffer = buffer;
+
+    memcpy(&no_of_elements, _buffer, sizeof(size_t));
+    _buffer += sizeof(size_t);
+
+    for (size_t i = 0; i < no_of_elements; i++)
+    {
+        element = (_z_questionable_sptr_t *) malloc(sizeof(_z_questionable_sptr_t));
+        memset(element->ptr, 0, sizeof(_z_questionable_t));
+
+        //_key._id _key._mapping._val _key._suffix _id _complete _callback _dropper serialize deserialize _arg_len _arg
+        element->ptr->_key = *((_z_keyexpr_t *)malloc(sizeof(_z_keyexpr_t)));
+        memcpy(&element->ptr->_key._id, _buffer, sizeof(uint16_t));
+        _buffer += sizeof(uint16_t);
+
+        memcpy(&element->ptr->_key._mapping._val, _buffer, sizeof(uint16_t));
+        _buffer += sizeof(uint16_t);
+
+        element->ptr->_key._suffix = malloc(strlen((char *)_buffer) + 1);
+        memcpy(element->ptr->_key._suffix, _buffer, strlen((char *)_buffer) + 1);
+        _buffer += strlen(element->ptr->_key._suffix) + 1;
+
+        memcpy(&element->ptr->_id, _buffer, sizeof(uint32_t));
+        _buffer += sizeof(uint32_t);
+
+        memcpy(&element->ptr->_complete, _buffer, sizeof(_Bool));
+        _buffer += sizeof(_Bool);
+
+        memcpy(&element->ptr->_callback, _buffer, 4); //cannot be NULL
+        _buffer += 4;
+
+        //_dropper serialize deserialize _arg_len _arg
+        size_t tmp_maybe_address;
+        memcpy(&tmp_maybe_address, _buffer, 4);
+        if(tmp_maybe_address != 0) memcpy(&element->ptr->_dropper, _buffer, 4);
+        _buffer += 4;
+
+        memcpy(&tmp_maybe_address, _buffer, 4);
+        if(tmp_maybe_address != 0) memcpy(&element->ptr->serde_functions.serialize, _buffer, 4);
+        _buffer += 4;
+
+        memcpy(&tmp_maybe_address, _buffer, 4);
+        if(tmp_maybe_address != 0) memcpy(&element->ptr->serde_functions.deserialize, _buffer, 4);
+        _buffer += 4;
+
+        int arg_len;
+        //deserialization of _arg
+        if(element->ptr->serde_functions.deserialize != NULL){
+            memcpy(&arg_len, _buffer, sizeof(int));
+            _buffer += sizeof(int);
+            element->ptr->serde_functions.deserialize((char *)_buffer, arg_len, NULL);
+        }
+
+        _z_questionable_sptr_list_push(list, element);
+    }
+
+    return list;
 }
