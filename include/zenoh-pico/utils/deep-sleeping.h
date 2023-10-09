@@ -35,6 +35,8 @@
 
 #define DIM_LOCAL_QUESTIONABLE 512
 
+#define DIM_PENDING_REPLIES 512
+
 int zp_prepare_to_sleep(z_owned_session_t session);
 z_owned_session_t zp_wake_up();
 
@@ -50,3 +52,6 @@ int8_t _write_questionable_local(void * writer, const char * serialized, int ser
 
 int _serialize_z_questionable_sptr_list_t(_z_questionable_sptr_list_t * list, int8_t (*write)(void *writer, const char *serialized, int serialized_len), uint8_t * questionable);
 _z_questionable_sptr_list_t * _deserialize_z_questionable_sptr_list_t(uint8_t * buffer);
+
+int _serialize_z_pending_reply_list_t(_z_pending_reply_list_t * list, uint8_t * pending_replies);
+_z_pending_reply_list_t * _deserialize_z_pending_reply_list_t(uint8_t *buffer);

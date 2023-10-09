@@ -25,6 +25,8 @@ RTC_DATA_ATTR static uint8_t remote_subscriptions[DIM_REMOTE_SUBSCRIPTIONS];
 
 RTC_DATA_ATTR static uint8_t local_questionable[DIM_LOCAL_QUESTIONABLE];
 
+RTC_DATA_ATTR static uint8_t pending_replies[DIM_PENDING_REPLIES];
+
 int zp_prepare_to_sleep(z_owned_session_t zs){
     _serialize_z_resource_list_t(zs._value->_local_resources, local_resources);
     _serialize_z_resource_list_t(zs._value->_remote_resources, remote_resources);
@@ -309,7 +311,6 @@ int _serialize_z_questionable_sptr_list_t(_z_questionable_sptr_list_t * list, in
     _z_questionable_sptr_t *element;
 
     size_t no_of_elements = _z_questionable_sptr_list_len(list);
-
     uint8_t *_buffer = questionable;
 
     //Serialization
@@ -418,4 +419,97 @@ _z_questionable_sptr_list_t * _deserialize_z_questionable_sptr_list_t(uint8_t * 
     }
 
     return list;
+}
+
+int _serialize_z_pending_reply_list_t(_z_pending_reply_list_t * list, uint8_t * pending_replies){
+    int ret = _Z_RES_OK;
+    _z_pending_reply_t *element;
+
+    size_t no_of_elements = _z_pending_reply_list_len(list);
+    uint8_t *_buffer = pending_replies;
+
+    //Serialization
+    memcpy(_buffer, &no_of_elements, sizeof(size_t));
+    _buffer += sizeof(size_t);
+
+    _z_pending_reply_list_t *iterate_list = list;
+    while(!_z_pending_reply_list_is_empty(iterate_list)){
+        element = _z_pending_reply_list_head(iterate_list);
+
+        // typedef struct {
+        //     _z_reply_t _reply;
+        //     _z_timestamp_t _tstamp;
+        // } _z_pending_reply_t;
+        
+        memcpy(_buffer, element->_tstamp.id.id, 16*sizeof(uint8_t));
+        _buffer += 16*sizeof(uint8_t);
+
+        memcpy(_buffer, &element->_tstamp.time, sizeof(uint64_t));
+        _buffer += sizeof(uint64_t);
+
+        // typedef struct {
+        //     _z_reply_data_t data;
+        //     z_reply_tag_t _tag;
+        // } _z_reply_t;
+
+        memcpy(_buffer, &element->_reply._tag, sizeof(z_reply_tag_t));
+        _buffer += sizeof(z_reply_tag_t);
+
+        // typedef struct {
+        //     _z_sample_t sample;
+        //     _z_id_t replier_id;
+        // } _z_reply_data_t;
+
+        memcpy(_buffer, element->_reply.data.replier_id.id, 16*sizeof(uint8_t));
+        _buffer += 16*sizeof(uint8_t);
+
+        // typedef struct {
+        //     _z_keyexpr_t keyexpr;
+        //     _z_bytes_t payload;
+        //     _z_timestamp_t timestamp;
+        //     _z_encoding_t encoding;
+        //     z_sample_kind_t kind;
+        // } _z_sample_t;
+        _z_sample_t sample = element->_reply.data.sample;
+        memcpy(_buffer, &sample.keyexpr._id, sizeof(uint16_t));
+        _buffer += sizeof(uint16_t);
+
+        memcpy(_buffer, &sample.keyexpr._mapping._val, sizeof(uint16_t));
+        _buffer += sizeof(uint16_t);
+
+        memcpy(_buffer, sample.keyexpr._suffix, strlen(sample.keyexpr._suffix) + 1);
+        _buffer += strlen(sample.keyexpr._suffix) + 1;
+
+        memcpy(_buffer, &sample.payload._is_alloc, sizeof(_Bool));
+        _buffer += sizeof(_Bool);
+
+        memcpy(_buffer, &sample.payload.len, sizeof(size_t));
+        _buffer += sizeof(size_t);
+
+        memcpy(_buffer, sample.payload.start, sample.payload.len);
+        _buffer += sample.payload.len;
+
+        memcpy(_buffer, sample.timestamp.id.id, 16*sizeof(uint8_t));
+        _buffer += 16*sizeof(uint8_t);
+
+        memcpy(_buffer, &sample.timestamp.time, sizeof(uint64_t));
+        _buffer += sizeof(uint64_t);
+
+        memcpy(_buffer, &sample.encoding.suffix._is_alloc, sizeof(_Bool));
+        _buffer += sizeof(_Bool);
+
+        memcpy(_buffer, &sample.encoding.suffix.len, sizeof(size_t));
+        _buffer += sizeof(size_t);
+
+        memcpy(_buffer, sample.encoding.suffix.start, sample.encoding.suffix.len);
+        _buffer += sample.encoding.suffix.len;
+
+        memcpy(_buffer, &sample.encoding.prefix, sizeof(z_encoding_prefix_t));
+        _buffer += sizeof(z_encoding_prefix_t);
+
+        memcpy(_buffer, &sample.kind, sizeof(z_sample_kind_t));
+        _buffer += sizeof(z_sample_kind_t);
+    }
+
+    return ret;
 }
