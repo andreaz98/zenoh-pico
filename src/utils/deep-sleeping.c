@@ -513,3 +513,101 @@ int _serialize_z_pending_reply_list_t(_z_pending_reply_list_t * list, uint8_t * 
 
     return ret;
 }
+
+_z_pending_reply_list_t * _deserialize_z_pending_reply_list_t(uint8_t *buffer){
+    _z_pending_reply_list_t * list = _z_pending_reply_list_new();
+    _z_pending_reply_t *element;
+    size_t no_of_elements;
+    uint8_t * _buffer = buffer;
+
+    memcpy(&no_of_elements, _buffer, sizeof(size_t));
+    _buffer += sizeof(size_t);
+
+    for (size_t i = 0; i < no_of_elements; i++){
+        element = (_z_pending_reply_t *) malloc(sizeof(_z_pending_reply_t));
+        memset(element, 0, sizeof(_z_pending_reply_t));
+
+        // typedef struct {
+        //     _z_reply_t _reply;
+        //     _z_timestamp_t _tstamp;
+        // } _z_pending_reply_t;
+        
+        memcpy(element->_tstamp.id.id, _buffer, 16*sizeof(uint8_t));
+        _buffer += 16*sizeof(uint8_t);
+
+        memcpy(&element->_tstamp.time, _buffer, sizeof(uint64_t));
+        _buffer += sizeof(uint64_t);
+
+        // typedef struct {
+        //     _z_reply_data_t data;
+        //     z_reply_tag_t _tag;
+        // } _z_reply_t;
+
+        memcpy(&element->_reply._tag, _buffer, sizeof(z_reply_tag_t));
+        _buffer += sizeof(z_reply_tag_t);
+
+        // typedef struct {
+        //     _z_sample_t sample;
+        //     _z_id_t replier_id;
+        // } _z_reply_data_t;
+
+        memcpy(element->_reply.data.replier_id.id, _buffer, 16*sizeof(uint8_t));
+        _buffer += 16*sizeof(uint8_t);
+
+        // typedef struct {
+        //     _z_keyexpr_t keyexpr;
+        //     _z_bytes_t payload;
+        //     _z_timestamp_t timestamp;
+        //     _z_encoding_t encoding;
+        //     z_sample_kind_t kind;
+        // } _z_sample_t;
+        _z_sample_t sample = element->_reply.data.sample;
+        memcpy(&sample.keyexpr._id, _buffer, sizeof(uint16_t));
+        _buffer += sizeof(uint16_t);
+
+        memcpy(&sample.keyexpr._mapping._val, _buffer, sizeof(uint16_t));
+        _buffer += sizeof(uint16_t);
+
+        sample.keyexpr._suffix = (char *)malloc(strlen((char *)_buffer) + 1);
+        memcpy(sample.keyexpr._suffix, _buffer, strlen((char *)_buffer) + 1);
+        _buffer += strlen((char *)_buffer) + 1;
+
+        memcpy(&sample.payload._is_alloc, _buffer,  sizeof(_Bool));
+        _buffer += sizeof(_Bool);
+
+        memcpy(&sample.payload.len, _buffer, sizeof(size_t));
+        _buffer += sizeof(size_t);
+
+        //raises warning: expected 'void * restrict' but argument is of type 'const uint8_t *'
+        sample.payload.start = (uint8_t *)malloc(sample.payload.len);
+        memcpy(sample.payload.start, _buffer, sample.payload.len);
+        _buffer += sample.payload.len;
+
+        memcpy(sample.timestamp.id.id, _buffer, 16*sizeof(uint8_t));
+        _buffer += 16*sizeof(uint8_t);
+
+        memcpy(&sample.timestamp.time, _buffer, sizeof(uint64_t));
+        _buffer += sizeof(uint64_t);
+
+        memcpy(&sample.encoding.suffix._is_alloc, _buffer, sizeof(_Bool));
+        _buffer += sizeof(_Bool);
+
+        memcpy(&sample.encoding.suffix.len, _buffer, sizeof(size_t));
+        _buffer += sizeof(size_t);
+
+        //raises warning: expected 'void * restrict' but argument is of type 'const uint8_t *'
+        sample.encoding.suffix.start = (uint8_t *)malloc(sample.encoding.suffix.len);
+        memcpy(sample.encoding.suffix.start, _buffer, sample.encoding.suffix.len);
+        _buffer += sample.encoding.suffix.len;
+
+        memcpy(&sample.encoding.prefix, _buffer, sizeof(z_encoding_prefix_t));
+        _buffer += sizeof(z_encoding_prefix_t);
+
+        memcpy(&sample.kind, _buffer, sizeof(z_sample_kind_t));
+        _buffer += sizeof(z_sample_kind_t);
+
+        _z_pending_reply_list_push(list, element);
+    }
+
+    return list;
+}
