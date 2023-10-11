@@ -699,9 +699,9 @@ int _serialize_z_pending_query_list_t(_z_pending_query_list_t *list, int8_t (*wr
         if(element->serde_functions.deserialize != NULL) memcpy(_buffer, &element->serde_functions.deserialize, 4);
         _buffer += 4;
 
-        if(element->_call_arg != NULL) element->serde_functions.serialize(write_call_arg, NULL, element->_call_arg);
+        if(element->_call_arg != NULL) element->serde_functions.serialize(write_call_arg, &_buffer, element->_call_arg);
 
-        if(element->_drop_arg != NULL) element->serde_functions.serialize(write_drop_arg, NULL, element->_drop_arg);
+        if(element->_drop_arg != NULL) element->serde_functions.serialize(write_drop_arg, &_buffer, element->_drop_arg);
 
         iterate_list = _z_pending_query_list_tail(iterate_list);
     }
@@ -756,7 +756,6 @@ _z_pending_query_list_t * _deserialize_z_pending_query_list_t(uint8_t *buffer){
         memcpy(&element->_callback, _buffer, 4); //cannot be NULL
         _buffer += 4;
 
-        //_dropper serialize deserialize _arg_len _arg
         size_t tmp_maybe_address;
         memcpy(&tmp_maybe_address, _buffer, 4);
         if(tmp_maybe_address != 0) memcpy(&element->_dropper, _buffer, 4);
@@ -770,12 +769,19 @@ _z_pending_query_list_t * _deserialize_z_pending_query_list_t(uint8_t *buffer){
         if(tmp_maybe_address != 0) memcpy(&element->serde_functions.deserialize, _buffer, 4);
         _buffer += 4;
 
-        int arg_len;
-        //deserialization of _arg
+        int _call_arg_len;
+        int _drop_arg_len;
+        //deserialization of _call_arg
         if(element->serde_functions.deserialize != NULL){
-            memcpy(&arg_len, _buffer, sizeof(int));
+            memcpy(&_call_arg_len, _buffer, sizeof(int));
             _buffer += sizeof(int);
-            element->serde_functions.deserialize((char *)_buffer, arg_len, NULL);
+            element->serde_functions.deserialize((char *)_buffer, _call_arg_len, "call_arg");
+            _buffer += _call_arg_len;
+
+            memcpy(&_drop_arg_len, _buffer, sizeof(int));
+            _buffer += sizeof(int);
+            element->serde_functions.deserialize((char *)_buffer, _drop_arg_len, "drop_arg");
+            _buffer += _drop_arg_len;
         }
 
         _z_pending_query_list_push(list, element);
