@@ -142,24 +142,33 @@ _z_resource_list_t * _deserialize_z_resource_list_t(uint8_t *buffer){
 
 int8_t _write_subscription_local(void * writer, const char * serialized, int serialized_len){
     int8_t ret = 0;
-    memcpy(local_subscriptions, &serialized_len, sizeof(serialized_len));
-    memcpy(local_subscriptions, serialized, serialized_len);
+    uint8_t *buffer = (uint8_t *)writer;
+    memcpy(buffer, &serialized_len, sizeof(serialized_len));
+    buffer += sizeof(serialized_len);
+    memcpy(buffer, serialized, serialized_len);
+    buffer += serialized_len;
 
     return ret;
 }
 
 int8_t _write_subscription_remote(void * writer, const char * serialized, int serialized_len){
     int8_t ret = 0;
-    memcpy(remote_subscriptions, &serialized_len, sizeof(serialized_len));
-    memcpy(remote_subscriptions, serialized, serialized_len);
+    uint8_t *buffer = (uint8_t *)writer;
+    memcpy(buffer, &serialized_len, sizeof(serialized_len));
+    buffer += sizeof(serialized_len);
+    memcpy(buffer, serialized, serialized_len);
+    buffer += serialized_len;
 
     return ret;
 }
 
 int8_t _write_questionable_local(void * writer, const char * serialized, int serialized_len){
     int8_t ret = 0;
-    memcpy(local_questionable, &serialized_len, sizeof(serialized_len));
-    memcpy(local_questionable, serialized, serialized_len);
+    uint8_t *buffer = (uint8_t *)writer;
+    memcpy(buffer, &serialized_len, sizeof(serialized_len));
+    buffer += sizeof(serialized_len);
+    memcpy(buffer, serialized, serialized_len);
+    buffer += serialized_len;
 
     return ret;
 }
@@ -221,8 +230,7 @@ int _serialize_z_subscription_sptr_list_t(_z_subscription_sptr_list_t * list, in
         if(element->ptr->serde_functions.deserialize != NULL) memcpy(_buffer, &element->ptr->serde_functions.deserialize, 4);
         _buffer += 4;
 
-        if(element->ptr->_arg != NULL) element->ptr->serde_functions.serialize(write, NULL, element->ptr->_arg);
-        _buffer += 4;
+        if(element->ptr->_arg != NULL) element->ptr->serde_functions.serialize(write, _buffer, element->ptr->_arg);
 
         iterate_list = _z_subscription_sptr_list_tail(iterate_list);
     }
@@ -350,8 +358,7 @@ int _serialize_z_questionable_sptr_list_t(_z_questionable_sptr_list_t * list, in
         if(element->ptr->serde_functions.deserialize != NULL) memcpy(_buffer, &element->ptr->serde_functions.deserialize, 4);
         _buffer += 4;
 
-        if(element->ptr->_arg != NULL) element->ptr->serde_functions.serialize(write, NULL, element->ptr->_arg);
-        _buffer += 4;
+        if(element->ptr->_arg != NULL) element->ptr->serde_functions.serialize(write, _buffer, element->ptr->_arg);
 
         iterate_list = _z_questionable_sptr_list_tail(iterate_list);
     }
