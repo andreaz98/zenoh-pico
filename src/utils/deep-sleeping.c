@@ -25,7 +25,7 @@ RTC_DATA_ATTR static uint8_t remote_subscriptions[DIM_REMOTE_SUBSCRIPTIONS];
 
 RTC_DATA_ATTR static uint8_t local_questionable[DIM_LOCAL_QUESTIONABLE];
 
-RTC_DATA_ATTR static uint8_t pending_replies[DIM_PENDING_REPLIES];
+RTC_DATA_ATTR static uint8_t pending_queries[DIM_PENDING_QUERIES];
 
 int zp_prepare_to_sleep(z_owned_session_t zs){
     _serialize_z_resource_list_t(zs._value->_local_resources, local_resources);
@@ -163,6 +163,28 @@ int8_t _write_subscription_remote(void * writer, const char * serialized, int se
 }
 
 int8_t _write_questionable_local(void * writer, const char * serialized, int serialized_len){
+    int8_t ret = 0;
+    uint8_t *buffer = (uint8_t *)writer;
+    memcpy(buffer, &serialized_len, sizeof(serialized_len));
+    buffer += sizeof(serialized_len);
+    memcpy(buffer, serialized, serialized_len);
+    buffer += serialized_len;
+
+    return ret;
+}
+
+int8_t _write_call_arg(void * writer, const char * serialized, int serialized_len){
+    int8_t ret = 0;
+    uint8_t *buffer = (uint8_t *)writer;
+    memcpy(buffer, &serialized_len, sizeof(serialized_len));
+    buffer += sizeof(serialized_len);
+    memcpy(buffer, serialized, serialized_len);
+    buffer += serialized_len;
+
+    return ret;
+}
+
+int8_t _write_drop_arg(void * writer, const char * serialized, int serialized_len){
     int8_t ret = 0;
     uint8_t *buffer = (uint8_t *)writer;
     memcpy(buffer, &serialized_len, sizeof(serialized_len));
