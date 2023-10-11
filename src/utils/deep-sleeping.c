@@ -611,3 +611,69 @@ _z_pending_reply_list_t * _deserialize_z_pending_reply_list_t(uint8_t *buffer){
 
     return list;
 }
+
+int _serialize_z_pending_query_list_t(_z_pending_query_list_t *list, int8_t (*write_call_arg)(void *writer, const char *serialized, int serialized_len), int8_t (*write_drop_arg)(void *writer, const char *serialized, int serialized_len), uint8_t *pending_queries){
+    int ret = _Z_RES_OK;
+    _z_pending_query_t *element;
+
+    size_t no_of_elements = _z_pending_query_list_len(list);
+    uint8_t *_buffer = pending_queries;
+
+    //Serialization
+    memcpy(_buffer, &no_of_elements, sizeof(size_t));
+    _buffer += sizeof(size_t);
+
+    _z_subscription_sptr_list_t *iterate_list = list;
+    while(!_z_pending_query_list_is_empty(iterate_list))
+    {
+        element = _z_pending_query_list_head(iterate_list);
+
+        //_key._id _key._mapping._val _key._suffix _id _parameters _target _consolidation _anykey _callback _dropper _serialize _deserialize _call_arg_len _call_arg _drop_arg_len _drop_arg
+        memcpy(_buffer, &element->_key._id, sizeof(uint16_t));
+        _buffer += sizeof(uint16_t);
+
+        memcpy(_buffer, &element->_key._mapping._val, sizeof(uint16_t));
+        _buffer += sizeof(uint16_t);
+
+        memcpy(_buffer, element->_key._suffix, strlen(element->_key._suffix) + 1);
+        _buffer += strlen(element->_key._suffix) + 1;
+
+        memcpy(_buffer, &element->_id, sizeof(uint32_t));
+        _buffer += sizeof(uint32_t);
+
+        // Since there is no _parameters_len I assumed _parameters is null-terminated.
+        memcpy(_buffer, element->_parameters, strlen(element->_parameters) + 1);
+        _buffer += sizeof(uint32_t);
+
+        memcpy(_buffer, &element->_target, sizeof(z_query_target_t));
+        _buffer += sizeof(z_query_target_t);
+
+        memcpy(_buffer, &element->_consolidation, sizeof(z_query_consolidation_t));
+        _buffer += sizeof(z_query_consolidation_t);
+
+        memcpy(_buffer, &element->_anykey, sizeof(_Bool));
+        _buffer += sizeof(_Bool);
+
+        _serialize_z_pending_reply_list_t(element->_pending_replies, pending_replies);
+
+        memcpy(_buffer, &element->_callback, 4); //cannot be NULL
+        _buffer += 4;
+
+        if(element->_dropper != NULL) memcpy(_buffer, &element->_dropper, 4);
+        _buffer += 4;
+
+        if(element->serde_functions.serialize != NULL) memcpy(_buffer, &element->serde_functions.serialize, 4);
+        _buffer += 4;
+
+        if(element->serde_functions.deserialize != NULL) memcpy(_buffer, &element->serde_functions.deserialize, 4);
+        _buffer += 4;
+
+        if(element->_call_arg != NULL) element->serde_functions.serialize(write_call_arg, NULL, element->_call_arg);
+        _buffer += 4;
+
+        if(element->_drop_arg != NULL) element->serde_functions.serialize(write_drop_arg, NULL, element->_drop_arg);
+        _buffer += 4;
+    }
+
+    return ret;
+}
