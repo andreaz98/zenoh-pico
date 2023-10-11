@@ -680,6 +680,8 @@ int _serialize_z_pending_query_list_t(_z_pending_query_list_t *list, int8_t (*wr
 
         if(element->_drop_arg != NULL) element->serde_functions.serialize(write_drop_arg, NULL, element->_drop_arg);
         _buffer += 4;
+
+        iterate_list = _z_pending_query_list_tail(iterate_list);
     }
 
     return ret;
