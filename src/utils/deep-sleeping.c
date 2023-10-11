@@ -428,12 +428,12 @@ _z_questionable_sptr_list_t * _deserialize_z_questionable_sptr_list_t(uint8_t * 
     return list;
 }
 
-int _serialize_z_pending_reply_list_t(_z_pending_reply_list_t * list, uint8_t * pending_replies){
+int _serialize_z_pending_reply_list_t(_z_pending_reply_list_t * list, uint8_t ** pending_replies){
     int ret = _Z_RES_OK;
     _z_pending_reply_t *element;
 
     size_t no_of_elements = _z_pending_reply_list_len(list);
-    uint8_t *_buffer = pending_replies;
+    uint8_t *_buffer = *pending_replies;
 
     //Serialization
     memcpy(_buffer, &no_of_elements, sizeof(size_t));
@@ -521,11 +521,11 @@ int _serialize_z_pending_reply_list_t(_z_pending_reply_list_t * list, uint8_t * 
     return ret;
 }
 
-_z_pending_reply_list_t * _deserialize_z_pending_reply_list_t(uint8_t *buffer){
+_z_pending_reply_list_t * _deserialize_z_pending_reply_list_t(uint8_t **buffer){
     _z_pending_reply_list_t * list = _z_pending_reply_list_new();
     _z_pending_reply_t *element;
     size_t no_of_elements;
-    uint8_t * _buffer = buffer;
+    uint8_t * _buffer = *buffer;
 
     memcpy(&no_of_elements, _buffer, sizeof(size_t));
     _buffer += sizeof(size_t);
