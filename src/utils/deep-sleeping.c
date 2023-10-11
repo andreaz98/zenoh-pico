@@ -175,7 +175,8 @@ int8_t _write_questionable_local(void * writer, const char * serialized, int ser
 
 int8_t _write_call_arg(void * writer, const char * serialized, int serialized_len){
     int8_t ret = 0;
-    uint8_t *buffer = (uint8_t *)writer;
+    uint8_t **_buffer = (uint8_t **)writer;
+    uint8_t * buffer = *_buffer;
     memcpy(buffer, &serialized_len, sizeof(serialized_len));
     buffer += sizeof(serialized_len);
     memcpy(buffer, serialized, serialized_len);
@@ -186,13 +187,14 @@ int8_t _write_call_arg(void * writer, const char * serialized, int serialized_le
 
 int8_t _write_drop_arg(void * writer, const char * serialized, int serialized_len){
     int8_t ret = 0;
-    uint8_t *buffer = (uint8_t *)writer;
+    uint8_t **_buffer = (uint8_t **)writer;
+    uint8_t * buffer = *_buffer;
     memcpy(buffer, &serialized_len, sizeof(serialized_len));
     buffer += sizeof(serialized_len);
     memcpy(buffer, serialized, serialized_len);
     buffer += serialized_len;
 
-    return ret;
+    return ret
 }
 
 int _serialize_z_subscription_sptr_list_t(_z_subscription_sptr_list_t * list, int8_t (*write)(void *writer, const char *serialized, int serialized_len), uint8_t * subscriptions){
