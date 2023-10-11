@@ -676,10 +676,8 @@ int _serialize_z_pending_query_list_t(_z_pending_query_list_t *list, int8_t (*wr
         _buffer += 4;
 
         if(element->_call_arg != NULL) element->serde_functions.serialize(write_call_arg, NULL, element->_call_arg);
-        _buffer += 4;
 
         if(element->_drop_arg != NULL) element->serde_functions.serialize(write_drop_arg, NULL, element->_drop_arg);
-        _buffer += 4;
 
         iterate_list = _z_pending_query_list_tail(iterate_list);
     }
