@@ -332,6 +332,7 @@ _z_subscription_sptr_list_t * _deserialize_z_subscription_sptr_list_t(uint8_t * 
             memcpy(&arg_len, _buffer, sizeof(int));
             _buffer += sizeof(int);
             element->ptr->serde_functions.deserialize((char *)_buffer, arg_len, NULL);
+            _buffer += arg_len;
         }
 
         _z_subscription_sptr_list_push(list, element);
@@ -447,6 +448,7 @@ _z_questionable_sptr_list_t * _deserialize_z_questionable_sptr_list_t(uint8_t * 
             memcpy(&arg_len, _buffer, sizeof(int));
             _buffer += sizeof(int);
             element->ptr->serde_functions.deserialize((char *)_buffer, arg_len, NULL);
+            _buffer += arg_len;
         }
 
         _z_questionable_sptr_list_push(list, element);
