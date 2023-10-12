@@ -197,7 +197,7 @@ int8_t _write_drop_arg(void * writer, const char * serialized, int serialized_le
     memcpy(buffer, serialized, serialized_len);
     buffer += serialized_len;
 
-    return ret
+    return ret;
 }
 
 int _serialize_z_subscription_sptr_list_t(_z_subscription_sptr_list_t * list, int8_t (*write)(void *writer, const char *serialized, int serialized_len), uint8_t * subscriptions){
@@ -776,16 +776,16 @@ _z_pending_query_list_t * _deserialize_z_pending_query_list_t(uint8_t *buffer){
 
         int _call_arg_len;
         int _drop_arg_len;
-        //deserialization of _call_arg
+        //deserialization of _call_arg & _drop_arg
         if(element->serde_functions.deserialize != NULL){
             memcpy(&_call_arg_len, _buffer, sizeof(int));
             _buffer += sizeof(int);
-            element->serde_functions.deserialize((char *)_buffer, _call_arg_len, "call_arg");
+            element->serde_functions.deserialize((char *)_buffer, _call_arg_len, (void **)"call_arg");
             _buffer += _call_arg_len;
 
             memcpy(&_drop_arg_len, _buffer, sizeof(int));
             _buffer += sizeof(int);
-            element->serde_functions.deserialize((char *)_buffer, _drop_arg_len, "drop_arg");
+            element->serde_functions.deserialize((char *)_buffer, _drop_arg_len, (void **)"drop_arg");
             _buffer += _drop_arg_len;
         }
 
