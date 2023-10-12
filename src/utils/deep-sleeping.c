@@ -40,6 +40,9 @@ int zp_prepare_to_sleep(z_owned_session_t zs){
     memset(local_questionable, 0, DIM_LOCAL_QUESTIONABLE);
     _serialize_z_questionable_sptr_list_t(zs._value->_local_questionable, _write_questionable_local, local_questionable);
 
+    memset(pending_queries, 0, DIM_PENDING_QUERIES);
+    _serialize_z_pending_query_list_t(zs._value->_pending_queries, _write_call_arg, _write_drop_arg, pending_queries);
+
     return 0;
 }
 
@@ -60,6 +63,8 @@ z_owned_session_t zp_wake_up(){
     
         // memset(local_questionable, 0, DIM_LOCAL_QUESTIONABLE);
         zs._value->_local_questionable = _deserialize_z_questionable_sptr_list_t(local_questionable);
+
+        zs._value->_pending_queries = _deserialize_z_pending_query_list_t(pending_queries);
     }
 
     return zs;
@@ -780,12 +785,12 @@ _z_pending_query_list_t * _deserialize_z_pending_query_list_t(uint8_t *buffer){
         if(element->serde_functions.deserialize != NULL){
             memcpy(&_call_arg_len, _buffer, sizeof(int));
             _buffer += sizeof(int);
-            element->serde_functions.deserialize((char *)_buffer, _call_arg_len, (void **)"call_arg");
+            element->serde_functions.deserialize((char *)_buffer, _call_arg_len, (void **)&"call_arg");
             _buffer += _call_arg_len;
 
             memcpy(&_drop_arg_len, _buffer, sizeof(int));
             _buffer += sizeof(int);
-            element->serde_functions.deserialize((char *)_buffer, _drop_arg_len, (void **)"drop_arg");
+            element->serde_functions.deserialize((char *)_buffer, _drop_arg_len, (void **)&"drop_arg");
             _buffer += _drop_arg_len;
         }
 
