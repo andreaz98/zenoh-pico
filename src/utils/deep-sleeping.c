@@ -709,10 +709,11 @@ int _serialize_z_pending_query_list_t(_z_pending_query_list_t *list, int8_t (*wr
         if(element->serde_functions.deserialize != NULL) memcpy(_buffer, &element->serde_functions.deserialize, 4);
         _buffer += 4;
 
-        if(element->_call_arg != NULL) element->serde_functions.serialize(write_call_arg, &_buffer, element->_call_arg);
+        // element->serde_functions.serialize != NULL solves InstrFetchProhibited when element->_call_arg != NULL but no serialize function has been provided by the user.
+        if(element->_call_arg != NULL && element->serde_functions.serialize != NULL) element->serde_functions.serialize(write_call_arg, &_buffer, element->_call_arg);
 
-        if(element->_drop_arg != NULL) element->serde_functions.serialize(write_drop_arg, &_buffer, element->_drop_arg);
-
+        if(element->_drop_arg != NULL && element->serde_functions.serialize != NULL) element->serde_functions.serialize(write_drop_arg, &_buffer, element->_drop_arg);
+        
         iterate_list = _z_pending_query_list_tail(iterate_list);
     }
 
