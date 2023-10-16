@@ -684,7 +684,7 @@ int _serialize_z_pending_query_list_t(_z_pending_query_list_t *list, int8_t (*wr
 
         // Since there is no _parameters_len I assumed _parameters is null-terminated.
         memcpy(_buffer, element->_parameters, strlen(element->_parameters) + 1);
-        _buffer += sizeof(uint32_t);
+        _buffer += strlen(element->_parameters) + 1;
 
         memcpy(_buffer, &element->_target, sizeof(z_query_target_t));
         _buffer += sizeof(z_query_target_t);
