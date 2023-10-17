@@ -356,7 +356,7 @@ int8_t _z_write(_z_session_t *zn, const _z_keyexpr_t keyexpr, const uint8_t *pay
 
 /*------------------ Query ------------------*/
 int8_t _z_query(_z_session_t *zn, _z_keyexpr_t keyexpr, const char *parameters, const z_query_target_t target,
-                const z_consolidation_mode_t consolidation, _z_value_t value, _z_reply_handler_t callback,
+                const z_consolidation_mode_t consolidation, _z_value_t value, zp_serde_functions_t serde_functions, _z_reply_handler_t callback,
                 void *arg_call, _z_drop_handler_t dropper, void *arg_drop) {
     int8_t ret = _Z_RES_OK;
 
@@ -374,6 +374,7 @@ int8_t _z_query(_z_session_t *zn, _z_keyexpr_t keyexpr, const char *parameters, 
         pq->_pending_replies = NULL;
         pq->_call_arg = arg_call;
         pq->_drop_arg = arg_drop;
+        pq->serde_functions = serde_functions;
 
         ret = _z_register_pending_query(zn, pq);  // Add the pending query to the current session
         if (ret == _Z_RES_OK) {

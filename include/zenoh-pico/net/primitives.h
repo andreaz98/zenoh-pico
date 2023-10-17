@@ -207,7 +207,7 @@ int8_t _z_subscriber_pull(const _z_subscriber_t *sub);
  *     arg_drop: A pointer that will be passed to the **dropper** on each call.
  */
 int8_t _z_query(_z_session_t *zn, _z_keyexpr_t keyexpr, const char *parameters, const z_query_target_t target,
-                const z_consolidation_mode_t consolidation, const _z_value_t value, _z_reply_handler_t callback,
+                const z_consolidation_mode_t consolidation, const _z_value_t value, zp_serde_functions_t serde_functions, _z_reply_handler_t callback,
                 void *arg_call, _z_drop_handler_t dropper, void *arg_drop);
 
 /**
