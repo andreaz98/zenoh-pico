@@ -27,7 +27,28 @@ RTC_DATA_ATTR static uint8_t local_questionable[DIM_LOCAL_QUESTIONABLE];
 
 RTC_DATA_ATTR static uint8_t pending_queries[DIM_PENDING_QUERIES];
 
+// Zenoh PID
+RTC_DATA_ATTR static uint8_t RTC_local_zid[16];
+
+// Session counters
+RTC_DATA_ATTR static uint16_t RTC_resource_id;
+RTC_DATA_ATTR static uint32_t RTC_entity_id;
+RTC_DATA_ATTR static size_t RTC_pull_id;
+RTC_DATA_ATTR static size_t RTC_query_id;
+RTC_DATA_ATTR static size_t RTC_interest_id;
+
+
 int zp_prepare_to_sleep(z_owned_session_t zs){
+    // Saving Zenoh PID
+    memcpy(RTC_local_zid, zs._value->_local_zid.id, 16);
+
+    // Saving session counters
+    RTC_resource_id = zs._value->_resource_id;
+    RTC_entity_id = zs._value->_entity_id;
+    RTC_pull_id = zs._value->_pull_id;
+    RTC_query_id = zs._value->_query_id;
+    RTC_interest_id = zs._value->_interest_id;
+
     _serialize_z_resource_list_t(zs._value->_local_resources, local_resources);
     _serialize_z_resource_list_t(zs._value->_remote_resources, remote_resources);
 
@@ -51,6 +72,16 @@ z_owned_session_t zp_wake_up(){
     memset(zs._value, 0, sizeof(_z_session_t));
 
     if (zs._value != NULL) {
+        // Restoring Zenoh PID
+        memcpy(zs._value->_local_zid.id, RTC_local_zid, 16);
+
+        // Restoring session counters
+        zs._value->_resource_id = RTC_resource_id;
+        zs._value->_entity_id = RTC_entity_id;
+        zs._value->_pull_id = RTC_pull_id;
+        zs._value->_query_id = RTC_query_id;
+        zs._value->_interest_id = RTC_interest_id;
+
         zs._value->_local_resources = _deserialize_z_resource_list_t(local_resources);
         zs._value->_remote_resources = _deserialize_z_resource_list_t(remote_resources);
 
