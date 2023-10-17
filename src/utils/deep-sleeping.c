@@ -147,60 +147,60 @@ _z_resource_list_t * _deserialize_z_resource_list_t(uint8_t *buffer){
 
 int8_t _write_subscription_local(void * writer, const char * serialized, int serialized_len){
     int8_t ret = 0;
-    uint8_t **_buffer = (uint8_t **)writer;
-    uint8_t * buffer = *_buffer;
-    memcpy(buffer, &serialized_len, sizeof(serialized_len));
-    buffer += sizeof(serialized_len);
-    memcpy(buffer, serialized, serialized_len);
-    buffer += serialized_len;
+    // uint8_t **_buffer = (uint8_t **)writer;
+    // uint8_t * buffer = *_buffer;
+    memcpy((uint8_t *)*writer, &serialized_len, sizeof(serialized_len));
+    (uint8_t *)*writer += sizeof(serialized_len);
+    memcpy((uint8_t *)*writer, serialized, serialized_len);
+    (uint8_t *)*writer += serialized_len;
 
     return ret;
 }
 
 int8_t _write_subscription_remote(void * writer, const char * serialized, int serialized_len){
     int8_t ret = 0;
-    uint8_t **_buffer = (uint8_t **)writer;
-    uint8_t * buffer = *_buffer;
-    memcpy(buffer, &serialized_len, sizeof(serialized_len));
-    buffer += sizeof(serialized_len);
-    memcpy(buffer, serialized, serialized_len);
-    buffer += serialized_len;
+    // uint8_t **_buffer = (uint8_t **)writer;
+    // uint8_t * buffer = *_buffer;
+    memcpy((uint8_t *)*writer, &serialized_len, sizeof(serialized_len));
+    (uint8_t *)*writer += sizeof(serialized_len);
+    memcpy((uint8_t *)*writer, serialized, serialized_len);
+    (uint8_t *)*writer += serialized_len;
 
     return ret;
 }
 
 int8_t _write_questionable_local(void * writer, const char * serialized, int serialized_len){
     int8_t ret = 0;
-    uint8_t **_buffer = (uint8_t **)writer;
-    uint8_t * buffer = *_buffer;
-    memcpy(buffer, &serialized_len, sizeof(serialized_len));
-    buffer += sizeof(serialized_len);
-    memcpy(buffer, serialized, serialized_len);
-    buffer += serialized_len;
+    // uint8_t **_buffer = (uint8_t **)writer;
+    // uint8_t * buffer = *_buffer;
+    memcpy((uint8_t *)*writer, &serialized_len, sizeof(serialized_len));
+    (uint8_t *)*writer += sizeof(serialized_len);
+    memcpy((uint8_t *)*writer, serialized, serialized_len);
+    (uint8_t *)*writer += serialized_len;
 
     return ret;
 }
 
 int8_t _write_call_arg(void * writer, const char * serialized, int serialized_len){
     int8_t ret = 0;
-    uint8_t **_buffer = (uint8_t **)writer;
-    uint8_t * buffer = *_buffer;
-    memcpy(buffer, &serialized_len, sizeof(serialized_len));
-    buffer += sizeof(serialized_len);
-    memcpy(buffer, serialized, serialized_len);
-    buffer += serialized_len;
+    // uint8_t **_buffer = (uint8_t **)writer;
+    // uint8_t * buffer = *_buffer;
+    memcpy((uint8_t *)*writer, &serialized_len, sizeof(serialized_len));
+    (uint8_t *)*writer += sizeof(serialized_len);
+    memcpy((uint8_t *)*writer, serialized, serialized_len);
+    (uint8_t *)*writer += serialized_len;
 
     return ret;
 }
 
 int8_t _write_drop_arg(void * writer, const char * serialized, int serialized_len){
     int8_t ret = 0;
-    uint8_t **_buffer = (uint8_t **)writer;
-    uint8_t * buffer = *_buffer;
-    memcpy(buffer, &serialized_len, sizeof(serialized_len));
-    buffer += sizeof(serialized_len);
-    memcpy(buffer, serialized, serialized_len);
-    buffer += serialized_len;
+    // uint8_t **_buffer = (uint8_t **)writer;
+    // uint8_t * buffer = *_buffer;
+    memcpy((uint8_t *)*writer, &serialized_len, sizeof(serialized_len));
+    (uint8_t *)*writer += sizeof(serialized_len);
+    memcpy((uint8_t *)*writer, serialized, serialized_len);
+    (uint8_t *)*writer += serialized_len;
 
     return ret;
 }
@@ -658,6 +658,11 @@ _z_pending_reply_list_t * _deserialize_z_pending_reply_list_t(uint8_t **buffer){
     }
 
     return list;
+}
+
+//int8_t (*zp_serializer_t)(int8_t (*write)(void *writer, const char *serialized, int serialized_len),void *writer, void *ctx);
+int8_t gravestone_value_for_serializer(int8_t (*write)(void *writer, const char *serialized, int serialized_len), void * writer, void *ctx){
+    return -1;
 }
 
 int _serialize_z_pending_query_list_t(_z_pending_query_list_t *list, int8_t (*write_call_arg)(void *writer, const char *serialized, int serialized_len), int8_t (*write_drop_arg)(void *writer, const char *serialized, int serialized_len), uint8_t *pending_queries){
