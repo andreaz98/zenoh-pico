@@ -149,10 +149,10 @@ int8_t _write_subscription_local(void * writer, const char * serialized, int ser
     int8_t ret = 0;
     // uint8_t **_buffer = (uint8_t **)writer;
     // uint8_t * buffer = *_buffer;
-    memcpy((uint8_t *)*writer, &serialized_len, sizeof(serialized_len));
-    (uint8_t *)*writer += sizeof(serialized_len);
-    memcpy((uint8_t *)*writer, serialized, serialized_len);
-    (uint8_t *)*writer += serialized_len;
+    memcpy(*(uint8_t **)writer, &serialized_len, sizeof(serialized_len));
+    *(uint8_t **)writer += sizeof(serialized_len);
+    memcpy(*(uint8_t **)writer, serialized, serialized_len);
+    *(uint8_t **)writer += serialized_len;
 
     return ret;
 }
@@ -161,10 +161,10 @@ int8_t _write_subscription_remote(void * writer, const char * serialized, int se
     int8_t ret = 0;
     // uint8_t **_buffer = (uint8_t **)writer;
     // uint8_t * buffer = *_buffer;
-    memcpy((uint8_t *)*writer, &serialized_len, sizeof(serialized_len));
-    (uint8_t *)*writer += sizeof(serialized_len);
-    memcpy((uint8_t *)*writer, serialized, serialized_len);
-    (uint8_t *)*writer += serialized_len;
+    memcpy(*(uint8_t **)writer, &serialized_len, sizeof(serialized_len));
+    *(uint8_t **)writer += sizeof(serialized_len);
+    memcpy(*(uint8_t **)writer, serialized, serialized_len);
+    *(uint8_t **)writer += serialized_len;
 
     return ret;
 }
@@ -173,10 +173,10 @@ int8_t _write_questionable_local(void * writer, const char * serialized, int ser
     int8_t ret = 0;
     // uint8_t **_buffer = (uint8_t **)writer;
     // uint8_t * buffer = *_buffer;
-    memcpy((uint8_t *)*writer, &serialized_len, sizeof(serialized_len));
-    (uint8_t *)*writer += sizeof(serialized_len);
-    memcpy((uint8_t *)*writer, serialized, serialized_len);
-    (uint8_t *)*writer += serialized_len;
+    memcpy(*(uint8_t **)writer, &serialized_len, sizeof(serialized_len));
+    *(uint8_t **)writer += sizeof(serialized_len);
+    memcpy(*(uint8_t **)writer, serialized, serialized_len);
+    *(uint8_t **)writer += serialized_len;
 
     return ret;
 }
@@ -185,10 +185,10 @@ int8_t _write_call_arg(void * writer, const char * serialized, int serialized_le
     int8_t ret = 0;
     // uint8_t **_buffer = (uint8_t **)writer;
     // uint8_t * buffer = *_buffer;
-    memcpy((uint8_t *)*writer, &serialized_len, sizeof(serialized_len));
-    (uint8_t *)*writer += sizeof(serialized_len);
-    memcpy((uint8_t *)*writer, serialized, serialized_len);
-    (uint8_t *)*writer += serialized_len;
+    memcpy(*(uint8_t **)writer, &serialized_len, sizeof(serialized_len));
+    *(uint8_t **)writer += sizeof(serialized_len);
+    memcpy(*(uint8_t **)writer, serialized, serialized_len);
+    *(uint8_t **)writer += serialized_len;
 
     return ret;
 }
@@ -197,10 +197,10 @@ int8_t _write_drop_arg(void * writer, const char * serialized, int serialized_le
     int8_t ret = 0;
     // uint8_t **_buffer = (uint8_t **)writer;
     // uint8_t * buffer = *_buffer;
-    memcpy((uint8_t *)*writer, &serialized_len, sizeof(serialized_len));
-    (uint8_t *)*writer += sizeof(serialized_len);
-    memcpy((uint8_t *)*writer, serialized, serialized_len);
-    (uint8_t *)*writer += serialized_len;
+    memcpy(*(uint8_t **)writer, &serialized_len, sizeof(serialized_len));
+    *(uint8_t **)writer += sizeof(serialized_len);
+    memcpy(*(uint8_t **)writer, serialized, serialized_len);
+    *(uint8_t **)writer += serialized_len;
 
     return ret;
 }
