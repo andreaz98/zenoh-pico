@@ -706,28 +706,29 @@ int _serialize_z_pending_query_list_t(_z_pending_query_list_t *list, int8_t (*wr
         ESP_LOGI("DEBUG", "pre &_buffer: %p", _buffer);
         _serialize_z_pending_reply_list_t(element->_pending_replies, &_buffer);// &_buffer to update the buffer pointer from the callee to the caller (I.E. this function)
         ESP_LOGI("DEBUG", "post &_buffer: %p", _buffer);
-        // memcpy(_buffer, &element->_callback, 4); //cannot be NULL
-        // _buffer += 4;
+
+        memcpy(_buffer, &element->_callback, 4); //cannot be NULL
+        _buffer += 4;
 
         // // troubleshooting IllegalInstruction
-        // if(element->_dropper != NULL) memcpy(_buffer, &element->_dropper, 4);
-        // _buffer += 4;
+        if(element->_dropper != NULL) memcpy(_buffer, &element->_dropper, 4);
+        _buffer += 4;
 
-        // if(element->serde_functions.serialize != NULL) memcpy(_buffer, &element->serde_functions.serialize, 4);
-        // _buffer += 4;
+        if(element->serde_functions.serialize != NULL) memcpy(_buffer, &element->serde_functions.serialize, 4);
+        _buffer += 4;
 
-        // if(element->serde_functions.deserialize != NULL) memcpy(_buffer, &element->serde_functions.deserialize, 4);
-        // _buffer += 4;
-
-        // // element->serde_functions.serialize != NULL solves InstrFetchProhibited when element->_call_arg != NULL but no serialize function has been provided by the user.
-        // if(element->_call_arg != NULL && element->serde_functions.serialize != NULL) element->serde_functions.serialize(write_call_arg, &_buffer, element->_call_arg);
-
-        // if(element->_drop_arg != NULL && element->serde_functions.serialize != NULL) element->serde_functions.serialize(write_drop_arg, &_buffer, element->_drop_arg);
+        if(element->serde_functions.deserialize != NULL) memcpy(_buffer, &element->serde_functions.deserialize, 4);
+        _buffer += 4;
+        // FIN QUI OK <--
+        
+        // there were a lot of problems HERE!!! solved by commit https://github.com/andreaz98/zenoh-pico/commit/15d0f7615b1ae776547cc6c15430f4e6d148b456
+        if(element->serde_functions.serialize != NULL) element->serde_functions.serialize(write_call_arg, &_buffer, element->_call_arg);
+        
+        if(element->serde_functions.serialize != NULL) element->serde_functions.serialize(write_drop_arg, &_buffer, element->_drop_arg);
         
         iterate_list = _z_pending_query_list_tail(iterate_list);
     }
 
-    ESP_LOGI("DEBUG", "right before ret\n");
     return ret;
 }
 
@@ -778,36 +779,36 @@ _z_pending_query_list_t * _deserialize_z_pending_query_list_t(uint8_t *buffer){
         element->_pending_replies = _deserialize_z_pending_reply_list_t(&_buffer);
         ESP_LOGI("DEBUG", "post &_buffer: %p", _buffer);
 
-        // memcpy(&element->_callback, _buffer, 4); //cannot be NULL
-        // _buffer += 4;
+        memcpy(&element->_callback, _buffer, 4); //cannot be NULL
+        _buffer += 4;
 
-        // size_t tmp_maybe_address;
-        // memcpy(&tmp_maybe_address, _buffer, 4);
-        // if(tmp_maybe_address != 0) memcpy(&element->_dropper, _buffer, 4);
-        // _buffer += 4;
+        size_t tmp_maybe_address;
+        memcpy(&tmp_maybe_address, _buffer, 4);
+        if(tmp_maybe_address != 0) memcpy(&element->_dropper, _buffer, 4);
+        _buffer += 4;
 
-        // memcpy(&tmp_maybe_address, _buffer, 4);
-        // if(tmp_maybe_address != 0) memcpy(&element->serde_functions.serialize, _buffer, 4);
-        // _buffer += 4;
+        memcpy(&tmp_maybe_address, _buffer, 4);
+        if(tmp_maybe_address != 0) memcpy(&element->serde_functions.serialize, _buffer, 4);
+        _buffer += 4;
 
-        // memcpy(&tmp_maybe_address, _buffer, 4);
-        // if(tmp_maybe_address != 0) memcpy(&element->serde_functions.deserialize, _buffer, 4);
-        // _buffer += 4;
+        memcpy(&tmp_maybe_address, _buffer, 4);
+        if(tmp_maybe_address != 0) memcpy(&element->serde_functions.deserialize, _buffer, 4);
+        _buffer += 4;
 
-        // int _call_arg_len;
-        // int _drop_arg_len;
-        // //deserialization of _call_arg & _drop_arg
-        // if(element->serde_functions.deserialize != NULL){
-        //     memcpy(&_call_arg_len, _buffer, sizeof(int));
-        //     _buffer += sizeof(int);
-        //     element->serde_functions.deserialize((char *)_buffer, _call_arg_len, (void **)&"call_arg");
-        //     _buffer += _call_arg_len;
+        int _call_arg_len;
+        int _drop_arg_len;
+        //deserialization of _call_arg & _drop_arg
+        if(element->serde_functions.deserialize != NULL){
+            memcpy(&_call_arg_len, _buffer, sizeof(int));
+            _buffer += sizeof(int);
+            element->serde_functions.deserialize((char *)_buffer, _call_arg_len, (void **)&"call_arg");
+            _buffer += _call_arg_len;
 
-        //     memcpy(&_drop_arg_len, _buffer, sizeof(int));
-        //     _buffer += sizeof(int);
-        //     element->serde_functions.deserialize((char *)_buffer, _drop_arg_len, (void **)&"drop_arg");
-        //     _buffer += _drop_arg_len;
-        // }
+            memcpy(&_drop_arg_len, _buffer, sizeof(int));
+            _buffer += sizeof(int);
+            element->serde_functions.deserialize((char *)_buffer, _drop_arg_len, (void **)&"drop_arg");
+            _buffer += _drop_arg_len;
+        }
 
         _z_pending_query_list_push(list, element);
     }
