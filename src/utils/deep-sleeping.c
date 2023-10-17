@@ -660,11 +660,6 @@ _z_pending_reply_list_t * _deserialize_z_pending_reply_list_t(uint8_t **buffer){
     return list;
 }
 
-//int8_t (*zp_serializer_t)(int8_t (*write)(void *writer, const char *serialized, int serialized_len),void *writer, void *ctx);
-int8_t gravestone_value_for_serializer(int8_t (*write)(void *writer, const char *serialized, int serialized_len), void * writer, void *ctx){
-    return -1;
-}
-
 int _serialize_z_pending_query_list_t(_z_pending_query_list_t *list, int8_t (*write_call_arg)(void *writer, const char *serialized, int serialized_len), int8_t (*write_drop_arg)(void *writer, const char *serialized, int serialized_len), uint8_t *pending_queries){
     ESP_LOGI("DEBUG", "_serialize_z_pending_query_list_t\n");
     int ret = _Z_RES_OK;
