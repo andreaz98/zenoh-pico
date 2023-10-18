@@ -27,6 +27,8 @@ RTC_DATA_ATTR static uint8_t local_questionable[DIM_LOCAL_QUESTIONABLE];
 
 RTC_DATA_ATTR static uint8_t pending_queries[DIM_PENDING_QUERIES];
 
+RTC_DATA_ATTR static uint8_t transport[DIM_TRANSPORT];
+
 // Zenoh PID
 RTC_DATA_ATTR static uint8_t RTC_local_zid[16];
 
@@ -39,6 +41,8 @@ RTC_DATA_ATTR static size_t RTC_interest_id;
 
 
 int zp_prepare_to_sleep(z_owned_session_t zs){
+
+
     // Saving Zenoh PID
     memcpy(RTC_local_zid, zs._value->_local_zid.id, 16);
 

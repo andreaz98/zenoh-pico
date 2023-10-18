@@ -37,6 +37,8 @@
 
 #define DIM_PENDING_QUERIES 1024
 
+#define DIM_TRANSPORT 512
+
 int zp_prepare_to_sleep(z_owned_session_t session);
 z_owned_session_t zp_wake_up();
 
@@ -61,3 +63,6 @@ _z_pending_reply_list_t * _deserialize_z_pending_reply_list_t(uint8_t **buffer);
 
 int _serialize_z_pending_query_list_t(_z_pending_query_list_t *list, int8_t (*write_call_arg)(void *writer, const char *serialized, int serialized_len), int8_t (*write_drop_arg)(void *writer, const char *serialized, int serialized_len), uint8_t *pending_queries);
 _z_pending_query_list_t * _deserialize_z_pending_query_list_t(uint8_t *buffer);
+
+int _serialize_z_transport_t(_z_transport_t transport);
+_z_transport_t _deserialize_z_transport_t(uint8_t *buffer);
