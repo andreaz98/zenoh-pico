@@ -41,7 +41,7 @@ RTC_DATA_ATTR static size_t RTC_interest_id;
 
 
 int zp_prepare_to_sleep(z_owned_session_t zs){
-
+    _serialize_z_transport_t(zs._value->_tp, transport);
 
     // Saving Zenoh PID
     memcpy(RTC_local_zid, zs._value->_local_zid.id, 16);
@@ -76,6 +76,8 @@ z_owned_session_t zp_wake_up(){
     memset(zs._value, 0, sizeof(_z_session_t));
 
     if (zs._value != NULL) {
+        zs._value->_tp = _deserialize_z_transport_t(transport);
+
         // Restoring Zenoh PID
         memcpy(zs._value->_local_zid.id, RTC_local_zid, 16);
 
@@ -849,4 +851,17 @@ _z_pending_query_list_t * _deserialize_z_pending_query_list_t(uint8_t *buffer){
     }
 
     return list;
+}
+
+int _serialize_z_transport_t(_z_transport_t tp, uint8_t *transport){
+    int ret = _Z_RES_OK;
+
+    return ret;
+}
+
+_z_transport_t _deserialize_z_transport_t(uint8_t *buffer){
+    _z_transport_t res;
+    memset(&res, 0, sizeof(_z_transport_t));
+
+    return res;
 }
