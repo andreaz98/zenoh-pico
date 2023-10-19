@@ -856,6 +856,125 @@ _z_pending_query_list_t * _deserialize_z_pending_query_list_t(uint8_t *buffer){
 int _serialize_z_transport_t(_z_transport_t tp, uint8_t *transport){
     int ret = _Z_RES_OK;
 
+    uint8_t *_buffer = transport;
+
+    memcpy(_buffer, &tp._type, sizeof(tp._type));
+    _buffer += sizeof(tp._type);
+
+    // Skipped Z_MULTI_THREAD fields, buffers, void*session
+    _z_transport_unicast_t unicast = tp._transport._unicast;
+
+    // _remote_zid.id SN_numbers _received _transmitted _link
+    memcpy(_buffer, unicast._remote_zid.id, 16);
+    _buffer += 16*sizeof(uint8_t);
+
+    memcpy(_buffer, &unicast._sn_res, sizeof(_z_zint_t));
+    _buffer += sizeof(_z_zint_t);
+    memcpy(_buffer, &unicast._sn_tx_reliable, sizeof(_z_zint_t));
+    _buffer += sizeof(_z_zint_t);
+    memcpy(_buffer, &unicast._sn_tx_best_effort, sizeof(_z_zint_t));
+    _buffer += sizeof(_z_zint_t);
+    memcpy(_buffer, &unicast._sn_rx_reliable, sizeof(_z_zint_t));
+    _buffer += sizeof(_z_zint_t);
+    memcpy(_buffer, &unicast._sn_rx_best_effort, sizeof(_z_zint_t));
+    _buffer += sizeof(_z_zint_t);
+    memcpy(_buffer, &unicast._lease, sizeof(_z_zint_t));
+    _buffer += sizeof(_z_zint_t);
+
+    memcpy(_buffer, &unicast._received, sizeof(_Bool));
+    _buffer += sizeof(_Bool);
+    memcpy(_buffer, &unicast._transmitted, sizeof(_Bool));
+    _buffer += sizeof(_Bool);
+
+    _z_link_t link = unicast._link;
+    char * endpoint = _z_endpoint_to_str(&link._endpoint);
+    memcpy(_buffer, endpoint, strlen(endpoint) + 1);
+    _buffer += strlen(endpoint) + 1;
+
+    memcpy(_buffer, &link._open_f, 4);
+    _buffer += 4;
+    memcpy(_buffer, &link._listen_f, 4);
+    _buffer += 4;
+    memcpy(_buffer, &link._close_f, 4);
+    _buffer += 4;
+    memcpy(_buffer, &link._write_f, 4);
+    _buffer += 4;
+    memcpy(_buffer, &link._write_all_f, 4);
+    _buffer += 4;
+    memcpy(_buffer, &link._read_f, 4);
+    _buffer += 4;
+    memcpy(_buffer, &link._read_exact_f, 4);
+    _buffer += 4;
+    memcpy(_buffer, &link._free_f, 4);
+    _buffer += 4;
+
+    memcpy(_buffer, &link._mtu, sizeof(uint16_t));
+    _buffer += sizeof(uint16_t);
+    memcpy(_buffer, &link._capabilities, sizeof(uint8_t));
+    _buffer += sizeof(uint8_t);
+
+    _z_udp_socket_t udp = link._socket._udp;
+    memcpy(_buffer, &udp._sock._fd, sizeof(int));
+    _buffer += sizeof(int);
+    memcpy(_buffer, &udp._msock._fd, sizeof(int));
+    _buffer += sizeof(int);
+
+    struct addrinfo *repiptcp = udp._rep._iptcp;
+    memcpy(_buffer, &repiptcp->ai_flags, sizeof(int));
+    _buffer += sizeof(int);
+    memcpy(_buffer, &repiptcp->ai_family, sizeof(int));
+    _buffer += sizeof(int);
+    memcpy(_buffer, &repiptcp->ai_socktype, sizeof(int));
+    _buffer += sizeof(int);
+    memcpy(_buffer, &repiptcp->ai_protocol, sizeof(int));
+    _buffer += sizeof(int);
+    memcpy(_buffer, &repiptcp->ai_addrlen, sizeof(socklen_t));
+    _buffer += sizeof(socklen_t);
+
+    memcpy(_buffer, repiptcp->ai_addr->sa_data, 14);
+    _buffer += 14;
+    memcpy(_buffer, &repiptcp->ai_addr->sa_family, sizeof(sa_family_t));
+    _buffer += sizeof(sa_family_t);
+    memcpy(_buffer, &repiptcp->ai_addr->sa_len, sizeof(u8_t));
+    _buffer += sizeof(u8_t);
+
+    memcpy(_buffer, repiptcp->ai_canonname, strlen(repiptcp->ai_canonname) + 1);
+    _buffer += strlen(repiptcp->ai_canonname) + 1;
+
+    //repiptcp->ai_next is NULL
+    
+    if(udp._lep._iptcp != NULL) {
+        struct addrinfo *lepiptcp = udp._lep._iptcp;
+        memcpy(_buffer, &lepiptcp->ai_flags, sizeof(int));
+        _buffer += sizeof(int);
+        memcpy(_buffer, &lepiptcp->ai_family, sizeof(int));
+        _buffer += sizeof(int);
+        memcpy(_buffer, &lepiptcp->ai_socktype, sizeof(int));
+        _buffer += sizeof(int);
+        memcpy(_buffer, &lepiptcp->ai_protocol, sizeof(int));
+        _buffer += sizeof(int);
+        memcpy(_buffer, &lepiptcp->ai_addrlen, sizeof(socklen_t));
+        _buffer += sizeof(socklen_t);
+        ESP_LOGI("DEBUG", "lepiptcp->ai_addrlen\n");
+
+        memcpy(_buffer, lepiptcp->ai_addr->sa_data, 14);
+        _buffer += 14;
+        memcpy(_buffer, &lepiptcp->ai_addr->sa_family, sizeof(sa_family_t));
+        _buffer += sizeof(sa_family_t);
+        memcpy(_buffer, &lepiptcp->ai_addr->sa_len, sizeof(u8_t));
+        _buffer += sizeof(u8_t);
+        ESP_LOGI("DEBUG", "lepiptcp->ai_addr->sa_len\n");
+
+        memcpy(_buffer, lepiptcp->ai_canonname, strlen(lepiptcp->ai_canonname) + 1);
+        _buffer += strlen(lepiptcp->ai_canonname) + 1;
+
+        if(lepiptcp->ai_next == NULL){
+            ESP_LOGI("DEBUG", "lepiptcp->ai_next == NULL \n");
+        } else {
+            ESP_LOGI("DEBUG", "lepiptcp->ai_next != NULL \n");
+        }
+    }
+
     return ret;
 }
 

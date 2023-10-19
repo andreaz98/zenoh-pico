@@ -18,7 +18,7 @@
 #include "zenoh-pico/session/utils.h"
 
 #include "zenoh-pico/api/types.h"
-
+#include <netdb.h>
 
 // These are the dimensions for the arrays in the RTC Slow RAM that will
 // contain your serialized structs while in deep sleep/hibernation mode.
