@@ -65,4 +65,6 @@ int _serialize_z_pending_query_list_t(_z_pending_query_list_t *list, int8_t (*wr
 _z_pending_query_list_t * _deserialize_z_pending_query_list_t(uint8_t *buffer);
 
 int _serialize_z_transport_t(_z_transport_t tp, uint8_t *transport);
-_z_transport_t _deserialize_z_transport_t(uint8_t *buffer);
+void _deserialize_z_transport_t(_z_transport_t *tp, uint8_t *buffer);
+
+int8_t __init_transport_t(_z_transport_t *zt);
