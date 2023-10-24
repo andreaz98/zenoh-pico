@@ -17,6 +17,8 @@
 #include <stddef.h>
 #include <string.h>
 
+#include <esp_log.h>
+
 #include "zenoh-pico/collections/bytes.h"
 #include "zenoh-pico/collections/string.h"
 #include "zenoh-pico/config.h"
@@ -27,6 +29,8 @@
 #include "zenoh-pico/utils/encoding.h"
 #include "zenoh-pico/utils/logging.h"
 #include "zenoh-pico/utils/pointers.h"
+
+RTC_DATA_ATTR static int RTC_source_port = 0;
 
 #if Z_LINK_TCP == 1
 /*------------------ TCP sockets ------------------*/
@@ -165,20 +169,58 @@ void _z_free_endpoint_udp(_z_sys_net_endpoint_t *ep) { freeaddrinfo(ep->_iptcp);
 int8_t _z_open_udp_unicast(_z_sys_net_socket_t *sock, const _z_sys_net_endpoint_t rep, uint32_t tout) {
     int8_t ret = _Z_RES_OK;
 
+    struct sockaddr_in sin;
+    sin.sin_port = 0;
+    sin.sin_family = rep._iptcp->ai_family;
+    sin.sin_addr.s_addr = INADDR_ANY;
+    socklen_t slen = sizeof(sin);
+
     sock->_fd = socket(rep._iptcp->ai_family, rep._iptcp->ai_socktype, rep._iptcp->ai_protocol);
-    if (sock->_fd != -1) {
-        z_time_t tv;
-        tv.tv_sec = tout / (uint32_t)1000;
-        tv.tv_usec = (tout % (uint32_t)1000) * (uint32_t)1000;
-        if ((ret == _Z_RES_OK) && (setsockopt(sock->_fd, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv, sizeof(tv)) < 0)) {
+
+    if(RTC_source_port == 0){// first time that the socket is used
+        if (sock->_fd != -1) {
+            z_time_t tv;
+            tv.tv_sec = tout / (uint32_t)1000;
+            tv.tv_usec = (tout % (uint32_t)1000) * (uint32_t)1000;
+            if ((ret == _Z_RES_OK) && (setsockopt(sock->_fd, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv, sizeof(tv)) < 0)) {
+                ret = _Z_ERR_GENERIC;
+            }
+
+            if (ret != _Z_RES_OK) {
+                close(sock->_fd);
+            }
+
+            // get currently used port
+            bind(sock->_fd, (struct sockaddr *)&sin, slen);//I need the bind otherwise the socket port remains 0, why?
+            // Maybe because the socket is assigned a port only when the socket is forced to bind or when it has to send something which implicitly binds.
+            if(getsockname(sock->_fd, (struct sockaddr *)&sin, &slen) < 0){
+                ESP_LOGI("ERROR", "_z_open_udp_unicast: unable to getsockname()\n");
+                ret = _Z_ERR_GENERIC;
+            }
+            ESP_LOGI("DEBUG", "_z_open_udp_unicast: sin.sin_port %d\n", sin.sin_port);
+            RTC_source_port = ntohs(sin.sin_port);
+            ESP_LOGI("DEBUG", "_z_open_udp_unicast: RTC_source_port %d\n", RTC_source_port);
+
+            if (ret != _Z_RES_OK) {
+                close(sock->_fd);
+            }
+        } else {
             ret = _Z_ERR_GENERIC;
         }
+    } else {// bind to the previously used port
+        if(sock->_fd != -1){
+            z_time_t tv;
+            tv.tv_sec = tout / (uint32_t)1000;
+            tv.tv_usec = (tout % (uint32_t)1000) * (uint32_t)1000;
+            if ((ret == _Z_RES_OK) && (setsockopt(sock->_fd, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv, sizeof(tv)) < 0)) {
+                ret = _Z_ERR_GENERIC;
+            }
 
-        if (ret != _Z_RES_OK) {
-            close(sock->_fd);
+            sin.sin_port = htons(RTC_source_port);
+            bind(sock->_fd, (struct sockaddr *)&sin, slen);
+        } else {
+            ret = _Z_ERR_GENERIC;
         }
-    } else {
-        ret = _Z_ERR_GENERIC;
     }
 
     return ret;

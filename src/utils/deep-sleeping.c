@@ -104,6 +104,9 @@ z_owned_session_t zp_wake_up(){
         zs._value->_pending_queries = _deserialize_z_pending_query_list_t(pending_queries);
 
         __init_transport_t(&zs._value->_tp);
+
+        // open UDP socket with the same port
+        zs._value->_tp._transport._unicast._link._open_f(&zs._value->_tp._transport._unicast._link);
     }
     return zs;
 }
