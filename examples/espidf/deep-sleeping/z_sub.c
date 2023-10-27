@@ -107,17 +107,11 @@ void wifi_init_sta(void) {
     vEventGroupDelete(s_event_group_handler);
 }
 
-void reply_dropper(void *ctx) { printf(" >> Received query final notification\n"); }
-
-void reply_handler(z_owned_reply_t *oreply, void *ctx) {
-    if (z_reply_is_ok(oreply)) {
-        z_sample_t sample = z_reply_ok(oreply);
-        z_owned_str_t keystr = z_keyexpr_to_string(sample.keyexpr);
-        printf(" >> Received ('%s': '%.*s')\n", z_loan(keystr), (int)sample.payload.len, sample.payload.start);
-        z_drop(z_move(keystr));
-    } else {
-        printf(" >> Received an error\n");
-    }
+void data_handler(const z_sample_t* sample, void* arg) {
+    z_owned_str_t keystr = z_keyexpr_to_string(sample->keyexpr);
+    printf(" >> [Subscriber handler] Received ('%s': '%.*s')\n", z_loan(keystr), (int)sample->payload.len,
+           sample->payload.start);
+    z_drop(z_move(keystr));
 }
 
 RTC_DATA_ATTR static int RTC_first_time = 1;
@@ -167,18 +161,20 @@ void app_main() {
     zp_start_read_task(z_loan(s), NULL);
     zp_start_lease_task(z_loan(s), NULL);
 
+    if(RTC_first_time){
+        printf("Declaring Subscriber on '%s'...", KEYEXPR);
+        z_owned_closure_sample_t callback = z_closure(data_handler);
+        z_owned_subscriber_t sub = z_declare_subscriber(z_loan(s), z_keyexpr(KEYEXPR), z_move(callback), NULL);
+        if (!z_check(sub)) {
+            printf("Unable to declare subscriber.\n");
+            exit(-1);
+        }
+        printf("OK!\n");
+    }
+
+    if(!RTC_first_time) zp_send_keep_alive(z_loan(s), NULL);
+    printf("Waiting publications on '%s'...\n", KEYEXPR);
     sleep(5);
-    printf("Sending Query '%s'...\n", KEYEXPR);
-    z_get_options_t opts = z_get_options_default();
-    if (strcmp(VALUE, "") != 0) {
-        opts.value.payload = _z_bytes_wrap((const uint8_t *)VALUE, strlen(VALUE));
-    }
-    z_owned_closure_reply_t callback = z_closure(reply_handler, reply_dropper);
-    if (z_get(z_loan(s), z_keyexpr(KEYEXPR), "", z_move(callback), &opts) < 0) {
-        printf("Unable to send query.\n");
-        exit(-1);
-    }
-    sleep(1);
 
     // Stop the receive and the session lease loop for zenoh-pico
     zp_stop_read_task(z_loan(s));

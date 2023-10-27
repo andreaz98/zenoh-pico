@@ -32,8 +32,8 @@
 
 #include <esp_sleep.h>
 
-#define ESP_WIFI_SSID "Wind3 HUB-D44CE1"
-#define ESP_WIFI_PASS "8j6hxsk8osy01xhg"
+#define ESP_WIFI_SSID "WIFI"
+#define ESP_WIFI_PASS "password"
 #define ESP_MAXIMUM_RETRY 5
 #define WIFI_CONNECTED_BIT BIT0
 
