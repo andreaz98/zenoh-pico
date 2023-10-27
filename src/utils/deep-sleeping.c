@@ -77,7 +77,7 @@ z_owned_session_t zp_wake_up(){
 
     if (zs._value != NULL) {
         _deserialize_z_transport_t(&zs._value->_tp, transport);
-
+        zs._value->_tp._transport._unicast._session = zs._value;
         // Restoring Zenoh PID
         memcpy(zs._value->_local_zid.id, RTC_local_zid, 16);
 
