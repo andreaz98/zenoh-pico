@@ -52,22 +52,6 @@ static int s_retry_count = 0;
 #error "Unknown Zenoh operation mode. Check CLIENT_OR_PEER value."
 #endif
 
-// void print_list(_z_resource_list_t *list){
-//     while(!_z_resource_list_is_empty(list)){
-//         _z_resource_t * element = _z_resource_list_head(list);
-
-//         printf("------element------\n");
-//         printf("_id %d\n", element->_id);
-//         printf("_refcount %d\n", element->_refcount);
-//         printf("_ptrd\n", element->_ptr
-//         printf("_ptring._val %d\n", element->_ptring._val);
-//         printf("_ptring._suffix %s\n", element->_ptrix);
-//         printf("-------------------\n");
-
-//         list = _z_resource_list_tail(list);
-//     }
-// }
-
 #define KEYEXPR "demo/example/zenoh-pico-pub"
 #define VALUE "[ESPIDF]{ESP32} Publication from Zenoh-Pico!"
 
@@ -134,22 +118,6 @@ void reply_handler(z_owned_reply_t *oreply, void *ctx) {
     } else {
         printf(" >> Received an error\n");
     }
-}
-
-void data_handler(const z_sample_t* sample, void* arg) {
-    z_owned_str_t keystr = z_keyexpr_to_string(sample->keyexpr);
-    printf(" >> [Subscriber handler] Received ('%s': '%.*s')\n", z_loan(keystr), (int)sample->payload.len,
-           sample->payload.start);
-    z_drop(z_move(keystr));
-}
-
-void query_handler(z_query_t *query, void *ctx) {
-    (void)(ctx);
-    z_owned_str_t keystr = z_keyexpr_to_string(z_query_keyexpr(query));
-    z_bytes_t pred = z_query_parameters(query);
-    printf(">> [Queryable handler] Received Query '%s%.*s'\n", z_loan(keystr), (int)pred.len, pred.start);
-    z_query_reply(query, z_keyexpr(KEYEXPR), (const unsigned char *)VALUE, strlen(VALUE), NULL);
-    z_drop(z_move(keystr));
 }
 
 RTC_DATA_ATTR static int RTC_first_time = 1;

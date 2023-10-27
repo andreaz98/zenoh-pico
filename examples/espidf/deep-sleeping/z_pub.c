@@ -52,22 +52,6 @@ static int s_retry_count = 0;
 #error "Unknown Zenoh operation mode. Check CLIENT_OR_PEER value."
 #endif
 
-// void print_list(_z_resource_list_t *list){
-//     while(!_z_resource_list_is_empty(list)){
-//         _z_resource_t * element = _z_resource_list_head(list);
-
-//         printf("------element------\n");
-//         printf("_id %d\n", element->_id);
-//         printf("_refcount %d\n", element->_refcount);
-//         printf("_ptrd\n", element->_ptr
-//         printf("_ptring._val %d\n", element->_ptring._val);
-//         printf("_ptring._suffix %s\n", element->_ptrix);
-//         printf("-------------------\n");
-
-//         list = _z_resource_list_tail(list);
-//     }
-// }
-
 #define KEYEXPR "demo/example/zenoh-pico-pub"
 #define VALUE "[ESPIDF]{ESP32} Publication from Zenoh-Pico!"
 
