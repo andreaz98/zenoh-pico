@@ -845,8 +845,16 @@ z_owned_subscriber_t z_declare_subscriber(z_session_t zs, z_keyexpr_t keyexpr, z
         subinfo.reliability = options->reliability;
     }
 
-    return (z_owned_subscriber_t){
-        ._value = _z_declare_subscriber(zs._val, key, subinfo, callback->call, callback->drop, ctx, options->serde_functions)};
+    if(options != NULL && options->serde_functions.serialize != NULL && options->serde_functions.deserialize != NULL){
+        return (z_owned_subscriber_t){
+            ._value = _z_declare_subscriber(zs._val, key, subinfo, callback->call, callback->drop, ctx, options->serde_functions)};
+    } else {
+        zp_serde_functions_t z_serde_functions_null;
+        z_serde_functions_null.serialize = NULL;
+        z_serde_functions_null.deserialize = NULL;
+        return (z_owned_subscriber_t){
+            ._value = _z_declare_subscriber(zs._val, key, subinfo, callback->call, callback->drop, ctx, z_serde_functions_null)};
+    }
 }
 
 z_owned_pull_subscriber_t z_declare_pull_subscriber(z_session_t zs, z_keyexpr_t keyexpr,
