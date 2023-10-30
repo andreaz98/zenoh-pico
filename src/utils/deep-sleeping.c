@@ -383,10 +383,13 @@ _z_subscription_sptr_list_t * _deserialize_z_subscription_sptr_list_t(uint8_t * 
     for (size_t i = 0; i < no_of_elements; i++)
     {
         element = (_z_subscription_sptr_t *) malloc(sizeof(_z_subscription_sptr_t));
+        memset(element, 0, sizeof(_z_subscription_sptr_t));
+
+        element->ptr = (_z_subscription_t *)malloc(sizeof(_z_subscription_t));
         memset(element->ptr, 0, sizeof(_z_subscription_t));
 
         //_key._id _key._mapping._val _key._suffix _id _info.period.origin _info.period.period _info.period.duration reliability mode _callback _dropper serialize deserialize _arg_len _arg
-        element->ptr->_key = *((_z_keyexpr_t *)malloc(sizeof(_z_keyexpr_t)));
+        //element->ptr->_key = *((_z_keyexpr_t *)malloc(sizeof(_z_keyexpr_t)));
         memcpy(&element->ptr->_key._id, _buffer, sizeof(uint16_t));
         _buffer += sizeof(uint16_t);
 
